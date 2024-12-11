@@ -1,0 +1,21 @@
+{
+  "name": "cake-walk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc -b && node ./dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/cli-color": "^2.0.6",
+    "@types/js-yaml": "^4.0.9",
+    "cli-color": "^2.0.4",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2"
+  }
+}
