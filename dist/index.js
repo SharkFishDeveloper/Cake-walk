@@ -16,9 +16,15 @@ const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const js_yaml_1 = __importDefault(require("js-yaml"));
 const exclude_1 = require("./lib/exclude");
+const inquirer_1 = __importDefault(require("inquirer"));
+const prompt_questions_1 = __importDefault(require("./lib/prompt_questions"));
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            //@ts-ignore
+            const answer = yield inquirer_1.default.prompt([prompt_questions_1.default[0]]);
+            console.log(answer);
+            return;
             if (!fs_1.default.existsSync("cake-walk.yml")) {
                 console.log((0, cli_color_1.greenBright)("I made cake-walk.yml file, please fill it and then continue "));
             }

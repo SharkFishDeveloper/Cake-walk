@@ -2,9 +2,17 @@ import {greenBright, red } from "cli-color"
 import fs from "fs";
 import yaml from 'js-yaml';
 import { excludeFiles } from "./lib/exclude";
+import inquirer from 'inquirer';
+import questions from "./lib/prompt_questions";
+
 
 async function start() {
     try {
+            //@ts-ignore
+          const answer = await inquirer.prompt([questions[0]]);
+
+          console.log(answer)
+          return;
 
         if(!fs.existsSync("cake-walk.yml")){
             console.log(greenBright("I made cake-walk.yml file, please fill it and then continue "))
