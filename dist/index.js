@@ -15,16 +15,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const js_yaml_1 = __importDefault(require("js-yaml"));
-const exclude_1 = require("./lib/exclude");
 const inquirer_1 = __importDefault(require("inquirer"));
-const prompt_questions_1 = __importDefault(require("./lib/prompt_questions"));
+const prompt_questions_js_1 = __importDefault(require("./lib/prompt_questions.js"));
+const exclude_js_1 = require("./lib/exclude.js");
+const nanospinner_1 = require("nanospinner");
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const spinner = (0, nanospinner_1.createSpinner)('Loading...').start();
+            setTimeout(() => {
+                spinner.success({ text: 'Loaded successfully!' });
+            }, 3000);
             //@ts-ignore
-            const answer = yield inquirer_1.default.prompt([prompt_questions_1.default[0]]);
-            console.log(answer);
-            return;
+            const prompt_answer = yield inquirer_1.default.prompt([prompt_questions_js_1.default[0]]);
             if (!fs_1.default.existsSync("cake-walk.yml")) {
                 console.log((0, cli_color_1.greenBright)("I made cake-walk.yml file, please fill it and then continue "));
             }
@@ -35,7 +38,7 @@ function start() {
             const ymlData = {
                 start: ["eg ../App.jsx"],
                 dependencies: allDependencies,
-                exclude: [exclude_1.excludeFiles],
+                exclude: [exclude_js_1.excludeFiles],
                 components: ""
             };
             let yamlString = js_yaml_1.default.dump(ymlData, {
