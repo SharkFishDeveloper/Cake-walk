@@ -61,6 +61,8 @@ async function handleParsedDataAfterPrompt() {
   let startFiles:string[]|null = parsedData.start;
   //@ts-ignore
   let language:string|null = parsedData.codebase;
+  //@ts-ignore
+  let proj_dependenciesdependencies:string[]|null = parsedData.dependencies[0];
 
   if (startFiles===null || startFiles.length === 0) {
     return console.log(redBright('Please enter the start files in Deepdive.yml ...'))
@@ -68,9 +70,12 @@ async function handleParsedDataAfterPrompt() {
   if(language===null || !language){
     return console.log(redBright('Please enter the language in  Deepdive.yml ...'))
   }
+  if(proj_dependenciesdependencies===null || proj_dependenciesdependencies.length===0){
+    return console.log(redBright('Please fill all the dependencies in  Deepdive.yml ...'))
+  }
   startFiles.forEach(async(start)=>{
-    await doSomething(start,language as string);
+    await doSomething(start,language as string,proj_dependenciesdependencies ?? []);
   })
 }
-
+//./repo/Fundrz-client/src/App.js
 start();

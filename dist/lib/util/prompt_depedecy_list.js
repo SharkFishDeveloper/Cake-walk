@@ -22,7 +22,7 @@ function readDependenciesFromPromt(language) {
             case 'Javascript':
             case 'NextJs':
             case 'ReactJs':
-                answerDependencies = [...js_1.default, 'react', 'react-dom'];
+                answerDependencies = [...js_1.default, 'react', 'react-dom', 'react-router-dom'];
         }
         return answerDependencies;
     });

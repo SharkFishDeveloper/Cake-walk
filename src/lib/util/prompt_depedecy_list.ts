@@ -7,7 +7,7 @@ export async function readDependenciesFromPromt(language: string) {
     case 'Javascript':
     case 'NextJs':
     case 'ReactJs':
-      answerDependencies = [...allDependenciesForJsTs, 'react', 'react-dom'];
+      answerDependencies = [...allDependenciesForJsTs, 'react', 'react-dom','react-router-dom'];
   }
   return answerDependencies;
 }

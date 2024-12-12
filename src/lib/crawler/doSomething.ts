@@ -1,10 +1,15 @@
 import path from "path";
 import jsRegex from "../regex/javascript";
 import fs from "fs";
+import { parseJsImports } from "../parse_imports/jsImports";
+import { redBright } from "cli-color";
 
 let regex: RegExp;
+let proj_dependencies:string[] ;
+export async function 
+doSomething(startfile:string,language:string,dependencies:string[]) {
+    proj_dependencies = dependencies;
 
-export async function doSomething(startfile:string,language:string) {
     switch (language[0]) {
         case 'Typescript':
         case 'Javascript':
@@ -14,29 +19,19 @@ export async function doSomething(startfile:string,language:string) {
         }
         readImports(startfile);
 }
+
 export async function readImports(startfile:string) {
     try {
         const base_path = path.join(process.cwd(),startfile)
         const file_content = fs.readFileSync(base_path,"utf-8")
-        const importsData = [];
-        let match;
-        while ((match = regex.exec(file_content)) !== null) {
-            const imports = match[1];
-            const from = match[2];
+        let importsData = [];
 
-            if (imports.startsWith('{')) {
-              const importsList = imports.replace(/[{}]/g, '').split(',').map(item => item.trim());
-              importsList.forEach(imp => {
-                importsData.push({ imported: imp, from });
-                // console.log(`Imported: ${imp} | From: ${from}`);
-              });
-            } else {
-              importsData.push({ imported: imports, from });
-            //   console.log(`Imported: ${imports} | From: ${from}`);
-            }
-          }
-          console.log(importsData);
+        //* make diff functions for diff languages that do all the work of checking path and dependency, use a switch statement
+        //* < ----- >
+        importsData = await parseJsImports(file_content,regex,proj_dependencies);
+        //* < ----- >
+        console.log("importsData",importsData);
     } catch (error) {
-        
+        console.log(redBright(error))
     }
 }

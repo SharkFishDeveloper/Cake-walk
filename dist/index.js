@@ -65,15 +65,21 @@ function handleParsedDataAfterPrompt() {
         let startFiles = parsedData.start;
         //@ts-ignore
         let language = parsedData.codebase;
+        //@ts-ignore
+        let proj_dependenciesdependencies = parsedData.dependencies[0];
         if (startFiles === null || startFiles.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please enter the start files in Deepdive.yml ...'));
         }
         if (language === null || !language) {
             return console.log((0, cli_color_1.redBright)('Please enter the language in  Deepdive.yml ...'));
         }
+        if (proj_dependenciesdependencies === null || proj_dependenciesdependencies.length === 0) {
+            return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
+        }
         startFiles.forEach((start) => __awaiter(this, void 0, void 0, function* () {
-            yield (0, doSomething_1.doSomething)(start, language);
+            yield (0, doSomething_1.doSomething)(start, language, proj_dependenciesdependencies !== null && proj_dependenciesdependencies !== void 0 ? proj_dependenciesdependencies : []);
         }));
     });
 }
+//./repo/Fundrz-client/src/App.js
 start();

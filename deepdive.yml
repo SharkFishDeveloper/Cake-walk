@@ -3,7 +3,7 @@ codebase:
         - ReactJs
 
 start:
-       - repo/Fundrz-client/src/App.js
+        - ./repo/Fundrz-client/src/App.js
 
 dependencies:
         -
@@ -18,3 +18,4 @@ dependencies:
                 - prettier
                 - react
                 - react-dom
+                - react-router-dom

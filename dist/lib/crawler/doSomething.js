@@ -16,9 +16,14 @@ exports.readImports = exports.doSomething = void 0;
 const path_1 = __importDefault(require("path"));
 const javascript_1 = __importDefault(require("../regex/javascript"));
 const fs_1 = __importDefault(require("fs"));
+const jsImports_1 = require("../parse_imports/jsImports");
+const cli_color_1 = require("cli-color");
 let regex;
-function doSomething(startfile, language) {
+let proj_dependencies;
+function doSomething(startfile, language, dependencies) {
     return __awaiter(this, void 0, void 0, function* () {
+        proj_dependencies = dependencies;
+        // console.log(startfile,language,proj_dependencies)
         switch (language[0]) {
             case 'Typescript':
             case 'Javascript':
@@ -35,26 +40,15 @@ function readImports(startfile) {
         try {
             const base_path = path_1.default.join(process.cwd(), startfile);
             const file_content = fs_1.default.readFileSync(base_path, "utf-8");
-            const importsData = [];
-            let match;
-            while ((match = regex.exec(file_content)) !== null) {
-                const imports = match[1];
-                const from = match[2];
-                if (imports.startsWith('{')) {
-                    const importsList = imports.replace(/[{}]/g, '').split(',').map(item => item.trim());
-                    importsList.forEach(imp => {
-                        importsData.push({ imported: imp, from });
-                        // console.log(`Imported: ${imp} | From: ${from}`);
-                    });
-                }
-                else {
-                    importsData.push({ imported: imports, from });
-                    //   console.log(`Imported: ${imports} | From: ${from}`);
-                }
-            }
-            console.log(importsData);
+            let importsData = [];
+            //* make diff functions for diff languages that do all the work of checking path and dependency, use a switch statement
+            //* < ----- >
+            importsData = yield (0, jsImports_1.parseJsImports)(file_content, regex, proj_dependencies);
+            //* < ----- >
+            console.log("importsData", importsData);
         }
         catch (error) {
+            console.log((0, cli_color_1.redBright)(error));
         }
     });
 }
