@@ -12,6 +12,12 @@ const questions = [
       'Rust',
     ],
   },
+  {
+    type: 'input',
+    name: 'startPoint',
+    message: 'What is the starting point of your project?',
+    default: '', // Optional default value
+  },
 ];
 
 export default questions;

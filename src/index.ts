@@ -1,21 +1,17 @@
-import { greenBright, red } from 'cli-color';
+#!/usr/bin/env node
+
+import { greenBright, red, redBright } from 'cli-color';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import inquirer from 'inquirer';
-import questions from './lib/prompt_questions.js';
-import { excludeFiles } from './lib/exclude.js';
+import questions from './lib/util/prompt_questions.js';
 import { createSpinner } from 'nanospinner';
+import { readDependenciesFromPromt } from './lib/util/prompt_depedecy_list';
 
 async function start() {
   try {
-    const spinner = createSpinner('Loading...').start();
-
-    setTimeout(() => {
-      spinner.success({ text: 'Loaded successfully!' });
-    }, 3000);
-    
     //@ts-ignore
-    const prompt_answer = await inquirer.prompt([questions[0]]);
+    const prompt_answer = await inquirer.prompt(questions);
 
     if (!fs.existsSync('cake-walk.yml')) {
       console.log(
@@ -24,21 +20,14 @@ async function start() {
         )
       );
     }
-
-    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-
-    const dependencies = packageJson.dependencies || {};
-    const devDependencies = packageJson.devDependencies || {};
-
-    const allDependencies = [
-      ...Object.keys(dependencies),
-      ...Object.keys(devDependencies),
-    ];
+    
+    let dependencies =  await readDependenciesFromPromt(prompt_answer.language);
 
     const ymlData = {
-      start: ['eg ../App.jsx'],
-      dependencies: allDependencies,
-      exclude: [excludeFiles],
+      codebase:[prompt_answer.language],
+      start: [prompt_answer.startPoint],
+      dependencies: [dependencies],
+      exclude:{},
       components: '',
     };
 

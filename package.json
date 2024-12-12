@@ -1,15 +1,19 @@
 {
-  "name": "cake-walk",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "deepdive-cli",
+  "version": "1.0.2",
+  "description": "A tool to explore large codebases",
+  "main": "./dist/index.js",
+  "bin": {
+    "deepdive-cli": "./dist/index.js"  
+  },
   "scripts": {
-    "dev": "tsc -b && node ./dist/index.js",
+    "dev": "tsc && node ./dist/index.js",
     "prod": "node ./dist/index.js",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepublishOnly": "npm run dev"
   },
   "keywords": [],
-  "author": "",
+  "author": "SharkFishdeveloper",
   "license": "ISC",
   "dependencies": {
     "@types/cli-color": "^2.0.6",

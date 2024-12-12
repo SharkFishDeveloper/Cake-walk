@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -16,30 +17,24 @@ const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const js_yaml_1 = __importDefault(require("js-yaml"));
 const inquirer_1 = __importDefault(require("inquirer"));
-const prompt_questions_js_1 = __importDefault(require("./lib/prompt_questions.js"));
-const exclude_js_1 = require("./lib/exclude.js");
-const nanospinner_1 = require("nanospinner");
+const prompt_questions_js_1 = __importDefault(require("./lib/util/prompt_questions.js"));
+const prompt_depedecy_list_1 = require("./lib/util/prompt_depedecy_list");
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const spinner = (0, nanospinner_1.createSpinner)('Loading...').start();
-            setTimeout(() => {
-                spinner.success({ text: 'Loaded successfully!' });
-            }, 3000);
             //@ts-ignore
-            const prompt_answer = yield inquirer_1.default.prompt([prompt_questions_js_1.default[0]]);
-            if (!fs_1.default.existsSync("cake-walk.yml")) {
-                console.log((0, cli_color_1.greenBright)("I made cake-walk.yml file, please fill it and then continue "));
+            const prompt_answer = yield inquirer_1.default.prompt(prompt_questions_js_1.default);
+            if (!fs_1.default.existsSync('cake-walk.yml')) {
+                console.log((0, cli_color_1.greenBright)('I made cake-walk.yml file, please fill it and then continue '));
             }
-            const packageJson = JSON.parse(fs_1.default.readFileSync('package.json', 'utf8'));
-            const dependencies = packageJson.dependencies || {};
-            const devDependencies = packageJson.devDependencies || {};
-            const allDependencies = [...Object.keys(dependencies), ...Object.keys(devDependencies)];
+            let dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(prompt_answer.language);
+            console.log((0, cli_color_1.redBright)(dependencies));
             const ymlData = {
-                start: ["eg ../App.jsx"],
-                dependencies: allDependencies,
-                exclude: [exclude_js_1.excludeFiles],
-                components: ""
+                codebase: [prompt_answer.language],
+                start: [prompt_answer.startPoint],
+                dependencies: [dependencies],
+                exclude: {},
+                components: '',
             };
             let yamlString = js_yaml_1.default.dump(ymlData, {
                 indent: 8, // Indentation level
@@ -56,3 +51,7 @@ function start() {
     });
 }
 start();
+// const spinner = createSpinner('Loading...').start();
+// setTimeout(() => {
+//   spinner.success({ text: 'Loaded successfully!' });
+// }, 3000);
