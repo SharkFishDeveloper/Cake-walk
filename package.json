@@ -4,7 +4,7 @@
   "description": "A tool to explore large codebases",
   "main": "./dist/index.js",
   "bin": {
-    "deepdive-cli": "./dist/index.js"  
+    "deepdive-cli": "./dist/index.js"
   },
   "scripts": {
     "dev": "tsc && node ./dist/index.js",

@@ -1,0 +1,20 @@
+
+codebase:
+        - ReactJs
+
+start:
+       
+
+dependencies:
+        -
+                - '@types/cli-color'
+                - '@types/inquirer'
+                - '@types/js-yaml'
+                - cli-color
+                - inquirer
+                - js-yaml
+                - nanospinner
+                - '@types/node'
+                - prettier
+                - react
+                - react-dom

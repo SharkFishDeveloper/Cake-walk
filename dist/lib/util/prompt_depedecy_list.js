@@ -17,13 +17,12 @@ const js_1 = __importDefault(require("../read_dependencies/js"));
 function readDependenciesFromPromt(language) {
     return __awaiter(this, void 0, void 0, function* () {
         let answerDependencies = [];
-        console.log("In a fucntion");
         switch (language) {
             case 'Typescript':
             case 'Javascript':
             case 'NextJs':
             case 'ReactJs':
-                answerDependencies = js_1.default;
+                answerDependencies = [...js_1.default, 'react', 'react-dom'];
         }
         return answerDependencies;
     });

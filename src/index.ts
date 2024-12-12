@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { greenBright, red, redBright } from 'cli-color';
+import { greenBright, red, redBright, yellowBright } from 'cli-color';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import inquirer from 'inquirer';
@@ -10,38 +10,56 @@ import { readDependenciesFromPromt } from './lib/util/prompt_depedecy_list';
 
 async function start() {
   try {
-    //@ts-ignore
-    const prompt_answer = await inquirer.prompt(questions);
+    //? Add logic so it does not ask question again and agai
 
-    if (!fs.existsSync('cake-walk.yml')) {
+    if (!fs.existsSync('deepdive.yml')) {
+      //@ts-ignore
+      const prompt_answer = await inquirer.prompt(questions);
+
+      let dependencies = await readDependenciesFromPromt(
+        prompt_answer.language
+      );
+
+      const ymlData = {
+        codebase: [prompt_answer.language],
+        start: [prompt_answer.startPoint],
+        dependencies: [dependencies],
+        // exclude:["//eg. files or folders which you want to exclude"],
+        // components: '',
+      };
+
+      let yamlString = yaml.dump(ymlData, {
+        indent: 8,
+        lineWidth: 80,
+        noRefs: true,
+        skipInvalid: true,
+      });
+
+      yamlString = yamlString.replace(/^(\w+):\n/gm, '\n$1:\n');
+      fs.writeFileSync('deepdive.yml', yamlString);
       console.log(
-        greenBright(
-          'I made cake-walk.yml file, please fill it and then continue '
+        yellowBright(
+          `I made deepdive.yml file, please fill it and then continue. 
+          Feel free to edit it! You can:
+          - Add multiple starting points
+          - Exclude any files or directories`
         )
       );
+    } else {
+      handleParsedDataAfterPrompt();
     }
-    
-    let dependencies =  await readDependenciesFromPromt(prompt_answer.language);
-
-    const ymlData = {
-      codebase:[prompt_answer.language],
-      start: [prompt_answer.startPoint],
-      dependencies: [dependencies],
-      exclude:{},
-      components: '',
-    };
-
-    let yamlString = yaml.dump(ymlData, {
-      indent: 8, // Indentation level
-      lineWidth: 80, // Limit line width for readability
-      noRefs: true, // Don't include references to objects in YAML
-      skipInvalid: true, // Skip invalid keys
-    });
-
-    yamlString = yamlString.replace(/^(\w+):\n/gm, '\n$1:\n');
-    fs.writeFileSync('cake-walk.yml', yamlString);
   } catch (error) {
     console.log(red(error));
+  }
+}
+
+async function handleParsedDataAfterPrompt() {
+  const fileContent = fs.readFileSync('deepdive.yml', 'utf8');
+  const parsedData = yaml.load(fileContent);
+  //@ts-ignore
+  let startFiles:string[]|null = parsedData.start;
+  if (startFiles===null || startFiles.length === 0) {
+    return console.log(redBright('Please enter the start files in Deepdive.yml ...'))
   }
 }
 
