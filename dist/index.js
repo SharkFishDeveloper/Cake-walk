@@ -19,6 +19,7 @@ const js_yaml_1 = __importDefault(require("js-yaml"));
 const inquirer_1 = __importDefault(require("inquirer"));
 const prompt_questions_js_1 = __importDefault(require("./lib/util/prompt_questions.js"));
 const prompt_depedecy_list_1 = require("./lib/util/prompt_depedecy_list");
+const doSomething_1 = require("./lib/crawler/doSomething");
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -62,9 +63,17 @@ function handleParsedDataAfterPrompt() {
         const parsedData = js_yaml_1.default.load(fileContent);
         //@ts-ignore
         let startFiles = parsedData.start;
+        //@ts-ignore
+        let language = parsedData.codebase;
         if (startFiles === null || startFiles.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please enter the start files in Deepdive.yml ...'));
         }
+        if (language === null || !language) {
+            return console.log((0, cli_color_1.redBright)('Please enter the language in  Deepdive.yml ...'));
+        }
+        startFiles.forEach((start) => __awaiter(this, void 0, void 0, function* () {
+            yield (0, doSomething_1.doSomething)(start, language);
+        }));
     });
 }
 start();

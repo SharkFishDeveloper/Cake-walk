@@ -7,6 +7,7 @@ import inquirer from 'inquirer';
 import questions from './lib/util/prompt_questions.js';
 import { createSpinner } from 'nanospinner';
 import { readDependenciesFromPromt } from './lib/util/prompt_depedecy_list';
+import { doSomething } from './lib/crawler/doSomething';
 
 async function start() {
   try {
@@ -58,9 +59,18 @@ async function handleParsedDataAfterPrompt() {
   const parsedData = yaml.load(fileContent);
   //@ts-ignore
   let startFiles:string[]|null = parsedData.start;
+  //@ts-ignore
+  let language:string|null = parsedData.codebase;
+
   if (startFiles===null || startFiles.length === 0) {
     return console.log(redBright('Please enter the start files in Deepdive.yml ...'))
   }
+  if(language===null || !language){
+    return console.log(redBright('Please enter the language in  Deepdive.yml ...'))
+  }
+  startFiles.forEach(async(start)=>{
+    await doSomething(start,language as string);
+  })
 }
 
 start();
