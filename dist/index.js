@@ -27,7 +27,7 @@ function start() {
             if (!fs_1.default.existsSync('deepdive.yml')) {
                 //@ts-ignore
                 const prompt_answer = yield inquirer_1.default.prompt(prompt_questions_js_1.default);
-                let dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(prompt_answer.language);
+                let dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(prompt_answer.language, prompt_answer.startPoint);
                 const ymlData = {
                     codebase: [prompt_answer.language],
                     start: [prompt_answer.startPoint],
@@ -49,6 +49,7 @@ function start() {
           - Exclude any files or directories`));
             }
             else {
+                //* if yml is already present, then perform this FX
                 handleParsedDataAfterPrompt();
             }
         }
@@ -65,19 +66,47 @@ function handleParsedDataAfterPrompt() {
         let startFiles = parsedData.start;
         //@ts-ignore
         let language = parsedData.codebase;
+        if (language === null || !language || !language[0]) {
+            return console.log((0, cli_color_1.redBright)('Please enter the language in  Deepdive.yml ...'));
+        }
+        let all_dependencies = [];
+        //* this function is just for reading the starting Files and all their dependencies
+        function processDependencies() {
+            return __awaiter(this, void 0, void 0, function* () {
+                for (const start of startFiles || []) {
+                    console.log(start);
+                    //@ts-ignore
+                    const dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(language[0], start);
+                    all_dependencies.push(...dependencies);
+                    console.log(all_dependencies);
+                }
+                // console.log('all_dependencies', all_dependencies);
+                const yamlString = fs_1.default.readFileSync('deepdive.yml', 'utf-8');
+                const parsedYaml = js_yaml_1.default.load(yamlString);
+                // Step 3: Modify the specific heading (assuming the heading is a key in the object)
+                if (parsedYaml && typeof parsedYaml === 'object') {
+                    //@ts-ignore
+                    parsedYaml['dependencies'] = all_dependencies;
+                }
+                const updatedYamlString = js_yaml_1.default.dump(parsedYaml);
+                // Step 5: Write the updated YAML string back to the file
+                fs_1.default.writeFileSync('deepdive.yml', updatedYamlString);
+                return;
+            });
+        }
+        processDependencies();
+        console.log(all_dependencies);
         //@ts-ignore
         let proj_dependenciesdependencies = parsedData.dependencies[0];
         if (startFiles === null || startFiles.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please enter the start files in Deepdive.yml ...'));
         }
-        if (language === null || !language) {
-            return console.log((0, cli_color_1.redBright)('Please enter the language in  Deepdive.yml ...'));
-        }
-        if (proj_dependenciesdependencies === null || proj_dependenciesdependencies.length === 0) {
+        if (proj_dependenciesdependencies === null ||
+            proj_dependenciesdependencies.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
         startFiles.forEach((start) => __awaiter(this, void 0, void 0, function* () {
-            yield (0, doSomething_1.doSomething)(start, language, proj_dependenciesdependencies !== null && proj_dependenciesdependencies !== void 0 ? proj_dependenciesdependencies : []);
+            yield (0, doSomething_1.doSomething)(start, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : []);
         }));
     });
 }

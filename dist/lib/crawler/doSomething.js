@@ -23,7 +23,6 @@ let proj_dependencies;
 function doSomething(startfile, language, dependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         proj_dependencies = dependencies;
-        // console.log(startfile,language,proj_dependencies)
         switch (language[0]) {
             case 'Typescript':
             case 'Javascript':
@@ -39,13 +38,12 @@ function readImports(startfile) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const base_path = path_1.default.join(process.cwd(), startfile);
-            const file_content = fs_1.default.readFileSync(base_path, "utf-8");
+            const file_content = fs_1.default.readFileSync(base_path, 'utf-8');
             let importsData = [];
             //* make diff functions for diff languages that do all the work of checking path and dependency, use a switch statement
             //* < ----- >
             importsData = yield (0, jsImports_1.parseJsImports)(file_content, regex, proj_dependencies);
             //* < ----- >
-            console.log("importsData", importsData);
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));
