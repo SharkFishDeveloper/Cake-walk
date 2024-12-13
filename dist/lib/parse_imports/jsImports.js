@@ -14,7 +14,7 @@ function parseJsImports(file_content, regex, proj_dependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         let importsData = [];
         let match;
-        console.log(proj_dependencies);
+        // console.log(proj_dependencies)
         while ((match = regex.exec(file_content)) !== null) {
             const imports = match[1];
             const from = match[2];
@@ -34,7 +34,7 @@ function parseJsImports(file_content, regex, proj_dependencies) {
                 }
             }
         }
-        console.log(importsData);
+        console.log(importsData[0]);
         return importsData;
     });
 }

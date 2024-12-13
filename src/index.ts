@@ -55,6 +55,37 @@ async function start() {
   }
 }
 
+
+
+
+async function processDependencies(startFiles:string[],all_dependencies:string[],language:string) {
+  for (const start of startFiles || []) {
+    //@ts-ignore
+    const dependencies = await readDependenciesFromPromt(language as string,
+      start
+    );
+    all_dependencies.push(...dependencies);
+    // console.log(all_dependencies)
+  }
+
+  // console.log('all_dependencies', all_dependencies);
+  const yamlString = fs.readFileSync('deepdive.yml', 'utf-8');
+  const parsedYaml = yaml.load(yamlString);
+
+  // Step 3: Modify the specific heading (assuming the heading is a key in the object)
+  if (parsedYaml && typeof parsedYaml === 'object') {
+    //@ts-ignore
+    parsedYaml['dependencies'] = all_dependencies;
+  }
+  const updatedYamlString = yaml.dump(parsedYaml);
+
+  // Step 5: Write the updated YAML string back to the file
+  fs.writeFileSync('deepdive.yml', updatedYamlString);
+  return;
+}
+
+
+
 async function handleParsedDataAfterPrompt() {
   const fileContent = fs.readFileSync('deepdive.yml', 'utf8');
   const parsedData = yaml.load(fileContent);
@@ -63,45 +94,17 @@ async function handleParsedDataAfterPrompt() {
   //@ts-ignore
   let language: string | null = parsedData.codebase;
 
-  if (language === null || !language || !language[0]) {
+  if (language === null || !language || !language[0] || startFiles==null ||startFiles?.length === 0) {
     return console.log(
-      redBright('Please enter the language in  Deepdive.yml ...')
+      redBright('Please fill properly in Deepdive.yml ...')
     );
   }
 
   let all_dependencies: string[] = [];
 
+  
   //* this function is just for reading the starting Files and all their dependencies
-  async function processDependencies() {
-    for (const start of startFiles || []) {
-      console.log(start);
-      //@ts-ignore
-      const dependencies = await readDependenciesFromPromt(language[0] as string,
-        start
-      );
-      all_dependencies.push(...dependencies);
-      console.log(all_dependencies)
-    }
-
-    // console.log('all_dependencies', all_dependencies);
-    const yamlString = fs.readFileSync('deepdive.yml', 'utf-8');
-    const parsedYaml = yaml.load(yamlString);
-
-    // Step 3: Modify the specific heading (assuming the heading is a key in the object)
-    if (parsedYaml && typeof parsedYaml === 'object') {
-      //@ts-ignore
-      parsedYaml['dependencies'] = all_dependencies;
-    }
-    const updatedYamlString = yaml.dump(parsedYaml);
-
-    // Step 5: Write the updated YAML string back to the file
-    fs.writeFileSync('deepdive.yml', updatedYamlString);
-    return;
-  }
-
-  processDependencies();
-
-  console.log(all_dependencies)
+  await processDependencies(startFiles,all_dependencies,language[0]);
 
   //@ts-ignore
   let proj_dependenciesdependencies: string[] | null = parsedData.dependencies[0];
@@ -119,13 +122,13 @@ async function handleParsedDataAfterPrompt() {
       redBright('Please fill all the dependencies in  Deepdive.yml ...')
     );
   }
-  startFiles.forEach(async (start) => {
-    await doSomething(
-      start,
-      language as string,
-      all_dependencies ?? []
-    );
-  });
+  for (const start of startFiles) {
+    await doSomething(start, language as string, all_dependencies ?? []);
+  }
 }
+
+
 //./repo/Fundrz-client/src/App.js
 start();
+
+

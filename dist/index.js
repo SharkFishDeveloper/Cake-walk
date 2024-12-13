@@ -58,6 +58,28 @@ function start() {
         }
     });
 }
+function processDependencies(startFiles, all_dependencies, language) {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (const start of startFiles || []) {
+            //@ts-ignore
+            const dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(language, start);
+            all_dependencies.push(...dependencies);
+            // console.log(all_dependencies)
+        }
+        // console.log('all_dependencies', all_dependencies);
+        const yamlString = fs_1.default.readFileSync('deepdive.yml', 'utf-8');
+        const parsedYaml = js_yaml_1.default.load(yamlString);
+        // Step 3: Modify the specific heading (assuming the heading is a key in the object)
+        if (parsedYaml && typeof parsedYaml === 'object') {
+            //@ts-ignore
+            parsedYaml['dependencies'] = all_dependencies;
+        }
+        const updatedYamlString = js_yaml_1.default.dump(parsedYaml);
+        // Step 5: Write the updated YAML string back to the file
+        fs_1.default.writeFileSync('deepdive.yml', updatedYamlString);
+        return;
+    });
+}
 function handleParsedDataAfterPrompt() {
     return __awaiter(this, void 0, void 0, function* () {
         const fileContent = fs_1.default.readFileSync('deepdive.yml', 'utf8');
@@ -66,36 +88,12 @@ function handleParsedDataAfterPrompt() {
         let startFiles = parsedData.start;
         //@ts-ignore
         let language = parsedData.codebase;
-        if (language === null || !language || !language[0]) {
-            return console.log((0, cli_color_1.redBright)('Please enter the language in  Deepdive.yml ...'));
+        if (language === null || !language || !language[0] || startFiles == null || (startFiles === null || startFiles === void 0 ? void 0 : startFiles.length) === 0) {
+            return console.log((0, cli_color_1.redBright)('Please fill properly in Deepdive.yml ...'));
         }
         let all_dependencies = [];
         //* this function is just for reading the starting Files and all their dependencies
-        function processDependencies() {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const start of startFiles || []) {
-                    console.log(start);
-                    //@ts-ignore
-                    const dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(language[0], start);
-                    all_dependencies.push(...dependencies);
-                    console.log(all_dependencies);
-                }
-                // console.log('all_dependencies', all_dependencies);
-                const yamlString = fs_1.default.readFileSync('deepdive.yml', 'utf-8');
-                const parsedYaml = js_yaml_1.default.load(yamlString);
-                // Step 3: Modify the specific heading (assuming the heading is a key in the object)
-                if (parsedYaml && typeof parsedYaml === 'object') {
-                    //@ts-ignore
-                    parsedYaml['dependencies'] = all_dependencies;
-                }
-                const updatedYamlString = js_yaml_1.default.dump(parsedYaml);
-                // Step 5: Write the updated YAML string back to the file
-                fs_1.default.writeFileSync('deepdive.yml', updatedYamlString);
-                return;
-            });
-        }
-        processDependencies();
-        console.log(all_dependencies);
+        yield processDependencies(startFiles, all_dependencies, language[0]);
         //@ts-ignore
         let proj_dependenciesdependencies = parsedData.dependencies[0];
         if (startFiles === null || startFiles.length === 0) {
@@ -105,9 +103,9 @@ function handleParsedDataAfterPrompt() {
             proj_dependenciesdependencies.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
-        startFiles.forEach((start) => __awaiter(this, void 0, void 0, function* () {
+        for (const start of startFiles) {
             yield (0, doSomething_1.doSomething)(start, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : []);
-        }));
+        }
     });
 }
 //./repo/Fundrz-client/src/App.js

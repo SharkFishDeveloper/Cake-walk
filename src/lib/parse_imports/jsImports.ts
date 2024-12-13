@@ -5,7 +5,7 @@ export async function parseJsImports(
 ) {
   let importsData = [];
   let match;
-  console.log(proj_dependencies)
+  // console.log(proj_dependencies)
   while ((match = regex.exec(file_content)) !== null) {
     const imports = match[1];
     const from = match[2];
@@ -25,6 +25,5 @@ export async function parseJsImports(
       }
     }
   }
-console.log(importsData)
   return importsData;
 }
