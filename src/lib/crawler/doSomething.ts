@@ -31,7 +31,7 @@ export async function readImports(startfile: string) {
 
     //* make diff functions for diff languages that do all the work of checking path and dependency, use a switch statement
     //* < ----- >
-    importsData = await parseJsImports(file_content, regex, proj_dependencies);
+    importsData = await parseJsImports(file_content, regex, proj_dependencies,base_path,startfile);
     //* < ----- >
   } catch (error) {
     console.log(redBright(error));
