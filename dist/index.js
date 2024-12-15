@@ -92,8 +92,10 @@ function handleParsedDataAfterPrompt() {
             return console.log((0, cli_color_1.redBright)('Please fill properly in Deepdive.yml ...'));
         }
         let all_dependencies = [];
+        //* < ------- >
         //* this function is just for reading the starting Files and all their dependencies
         yield processDependencies(startFiles, all_dependencies, language[0]);
+        //* < ------- >
         //@ts-ignore
         let proj_dependenciesdependencies = parsedData.dependencies[0];
         if (startFiles === null || startFiles.length === 0) {
@@ -103,6 +105,7 @@ function handleParsedDataAfterPrompt() {
             proj_dependenciesdependencies.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
+        //* this loops all the starting files
         for (const start of startFiles) {
             yield (0, doSomething_1.doSomething)(start, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : []);
         }

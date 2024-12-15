@@ -1,85 +1,41 @@
-import { blue, green, greenBright, magenta, red, redBright, yellow } from "cli-color";
+import clc, { blue, green, greenBright, magenta, magentaBright, red, redBright, yellow, yellowBright } from "cli-color";
 import fs from "fs";
 import path from "path";
+import TsJsextensions from "../extensions/jstsExtensions";
 
 
-export async function parseJsImports(
-  file_content: string,
-  regex: RegExp,
-  proj_dependencies: string[],
-  base_path:string,
-  startfile:string,
-) {
-  let importsData = [];
-  let match;
-  while ((match = regex.exec(file_content)) !== null) {
-    const imports = match[1];
-    const from = match[2];
-
-    // Exclude imports where the "from" is in proj_dependencies
-    if (!proj_dependencies.some(dep => from.includes(dep))) {
-      if (imports.startsWith('{')) {
-        const importsList = imports
-          .replace(/[{}]/g, '')
-          .split(',')
-          .map((item) => item.trim());
-        importsList.forEach((imp) => {
-          importsData.push({ imported: imp, from });
-        });
-      } else {
-        importsData.push({ imported: imports, from });
-      }
-    }
-  }
-  await normalizeJsImports(importsData,base_path,startfile,regex,proj_dependencies)
-  return importsData;
-}
-
-
-
-//? What if the file import has no extension behind ?
-
-const extensions = ['.js', '.ts', '.jsx', '.tsx', '.css'];
 interface JsImports {
   imported:string,
   from:string
 }
 
-let ans:{};
 
-async function normalizeJsImports(importsData:JsImports[],base_path:string,startfile:string,regex: RegExp,proj_dependencies:string[]){
-  let vis=[];
-  let removedFilePath = path.dirname(base_path);
-  // const finalImportPath = path.join(removedFilePath,importsData[0].from);
-  // dfs(finalImportPath,regex,proj_dependencies);
-  importsData.forEach((imp)=>{
-    const finalImportPath = path.join(removedFilePath,imp.from);
-    if(fs.existsSync(finalImportPath)){
-      // Do dfs
-      console.log(magenta("Exists->",finalImportPath))
-      dfs(finalImportPath,regex,base_path,proj_dependencies);    
-    }else{
-      console.log(redBright("DOES NOT Exists->",finalImportPath))
+async function checkDependenciesInFile(importsData:JsImports[],proj_dependencies:string[],
+  regex:RegExp,
+  parent_path:string
+){
+  let file_path = parent_path;
+
+  if(!fs.existsSync(file_path)){
+    for (const ext of TsJsextensions) {
+      const pathChild = path.join(file_path,ext);
+      if(fs.existsSync(pathChild)){
+        file_path = path.join(file_path,ext);
+        console.log(yellowBright("EX->",pathChild))
+        return;
+      }else{
+        console.log(red("DNE",pathChild))
+      }
     }
-    return;
-  })
-}
-
-
-
-async function dfs(finalImportPath:string,regex: RegExp,base_path:string,proj_dependencies:string[]) {
-  const file_content = fs.readFileSync(finalImportPath,"utf-8");
-  let importsData:JsImports[] = [];
+  }
+  const file_content = fs.readFileSync(file_path,"utf-8");
   let match;
-  console.log(greenBright("ADD IMPORTS OF VISIT->",finalImportPath))
-
   while ((match = regex.exec(file_content)) !== null) {
     const imports = match[1];
     const from = match[2];
 
     // Exclude imports where the "from" is in proj_dependencies
-    if (!proj_dependencies.some(dep => from.includes(dep))) {
-      // console.log(yellow(`Cannot exclude ${from}`))
+    if (!proj_dependencies.some(dep => from.startsWith(dep))) {
       if (imports.startsWith('{')) {
         const importsList = imports
           .replace(/[{}]/g, '')
@@ -93,16 +49,42 @@ async function dfs(finalImportPath:string,regex: RegExp,base_path:string,proj_de
       }
     }
   }
-  importsData.forEach((item)=>{
-    const dependency_path = path.join(path.dirname(finalImportPath),item.from);
-    for (let ext of extensions) {
-      const dependencyPath = path.join(dependency_path + ext);
-      
-      if (fs.existsSync(dependencyPath)) {
-        console.log(blue(`File found: ${dependencyPath}`,path.relative(base_path,dependencyPath)));
-        dfs(dependencyPath,regex,base_path,proj_dependencies);
-      }
-    }
-  })
-  console.log(green("________"))
 }
+
+
+export async function INITIAL_START_parseJsImports(
+  regex: RegExp,
+  proj_dependencies: string[],
+  parent_path:string,//* FOR INITIAL PATH IT SHOULD BE "<START>"
+  child_path:string, //* This is initial file path like ("../user.js")
+) {
+
+  let child_path_parent = path.join(process.cwd(),child_path); 
+  let importsInAFile:JsImports[] = [] ;
+  console.log(clc.magentaBright(parent_path,"<<<>>>"))
+  checkDependenciesInFile(importsInAFile,proj_dependencies,regex,child_path_parent);
+
+  
+  importsInAFile.forEach((imp,i)=>{
+    const pathChild = path.join(process.cwd(),path.dirname(child_path),imp.from);
+    // console.log(i+1,imp.from,pathChild)
+    console.log(i+1)
+    parseJsImportsDFS(regex,proj_dependencies,pathChild);
+  })
+
+}
+
+export async function parseJsImportsDFS(
+  regex: RegExp,
+  proj_dependencies: string[],
+  parent_path:string,//* FOR INITIAL PATH IT SHOULD BE "<START>"
+) {
+  let importsInAFile:JsImports[] = [];
+  checkDependenciesInFile(importsInAFile,proj_dependencies,regex,parent_path);
+  console.log(clc.magentaBright("parent_path","------",parent_path,"------"))
+  importsInAFile.map((imp)=>{
+    console.log(clc.yellowBright("CHILD",imp.imported,imp.from));
+  })
+  console.log("\n")
+}
+

@@ -102,9 +102,10 @@ async function handleParsedDataAfterPrompt() {
 
   let all_dependencies: string[] = [];
 
-  
+  //* < ------- >
   //* this function is just for reading the starting Files and all their dependencies
   await processDependencies(startFiles,all_dependencies,language[0]);
+  //* < ------- >
 
   //@ts-ignore
   let proj_dependenciesdependencies: string[] | null = parsedData.dependencies[0];
@@ -122,6 +123,7 @@ async function handleParsedDataAfterPrompt() {
       redBright('Please fill all the dependencies in  Deepdive.yml ...')
     );
   }
+  //* this loops all the starting files
   for (const start of startFiles) {
     await doSomething(start, language as string, all_dependencies ?? []);
   }

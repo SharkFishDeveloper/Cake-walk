@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.readImports = exports.doSomething = void 0;
 const path_1 = __importDefault(require("path"));
 const javascript_1 = __importDefault(require("../regex/javascript"));
-const fs_1 = __importDefault(require("fs"));
 const jsImports_1 = require("../parse_imports/jsImports");
 const cli_color_1 = require("cli-color");
 let regex;
@@ -23,6 +22,7 @@ let proj_dependencies;
 function doSomething(startfile, language, dependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         proj_dependencies = dependencies;
+        //* add multiple switch statements for importing a particular language's REGEX
         switch (language[0]) {
             case 'Typescript':
             case 'Javascript':
@@ -38,11 +38,10 @@ function readImports(startfile) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const base_path = path_1.default.join(process.cwd(), startfile);
-            const file_content = fs_1.default.readFileSync(base_path, 'utf-8');
             let importsData = [];
-            //* make diff functions for diff languages that do all the work of checking path and dependency, use a switch statement
+            //* make diff functions for diff. languages that do all the work of checking path and dependency, use a switch statement
             //* < ----- >
-            importsData = yield (0, jsImports_1.parseJsImports)(file_content, regex, proj_dependencies, base_path, startfile);
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, "START", startfile);
             //* < ----- >
         }
         catch (error) {
