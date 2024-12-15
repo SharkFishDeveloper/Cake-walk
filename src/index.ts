@@ -124,14 +124,10 @@ async function handleParsedDataAfterPrompt() {
     );
   }
   //* this loops all the starting files
-  //@ts-ignore
-    let finalAns = [];
-     //@ts-ignore
+    let finalAns: ImportsMap = {};
     await doSomething(startFiles, language as string, all_dependencies ?? [],finalAns);
 }
 
-
-//./repo/Fundrz-client/src/App.js
 start();
 
 

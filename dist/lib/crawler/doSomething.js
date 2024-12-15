@@ -41,7 +41,8 @@ function readImports(startfile, finalAns) {
             let importsData = [];
             //* make diff functions for diff. languages that do all the work of checking path and dependency, use a switch statement
             //* < ----- >
-            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, "START", startfile);
+            //@ts-ignore
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, "START", startfile, finalAns);
             //* < ----- >
         }
         catch (error) {

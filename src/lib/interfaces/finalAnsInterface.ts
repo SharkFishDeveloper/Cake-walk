@@ -1,10 +1,11 @@
-interface FINAL_ANS_INTERFACE{
+interface FINAL_VIEW_INTERFACE{
     parent_path:string,
-    child_path_array:CHILD_ANS_INTERFACE[]
+    parent_full_path:string,
+    full_path_child:string,
+    half_path_child:string
 }
 
-interface CHILD_ANS_INTERFACE{
-    child_path:string,
-    from:string,
-    imported:string
-}
+
+type ImportsMap = {
+    [key: string]: FINAL_VIEW_INTERFACE[];
+};
