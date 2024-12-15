@@ -1,3 +1,3 @@
-const TsJsextensions = ['.js', '.ts', '.jsx', '.tsx', '.css'];
+const TsJsextensions = ['.ts','.js','.jsx','.tsx','.css'];
 
 export default TsJsextensions;

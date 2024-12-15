@@ -124,9 +124,10 @@ async function handleParsedDataAfterPrompt() {
     );
   }
   //* this loops all the starting files
-  for (const start of startFiles) {
-    await doSomething(start, language as string, all_dependencies ?? []);
-  }
+  //@ts-ignore
+    let finalAns = [];
+     //@ts-ignore
+    await doSomething(startFiles, language as string, all_dependencies ?? [],finalAns);
 }
 
 

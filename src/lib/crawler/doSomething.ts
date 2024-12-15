@@ -8,9 +8,10 @@ let regex: RegExp;
 let proj_dependencies: string[];
 
 export async function doSomething(
-  startfile: string,
+  startfileArray: string[],
   language: string,
-  dependencies: string[]
+  dependencies: string[],
+  finalAns:[]
 ) {
   proj_dependencies = dependencies;
 
@@ -22,15 +23,16 @@ export async function doSomething(
     case 'ReactJs':
       regex = jsRegex;
   }
-  readImports(startfile);
+  for(const startfile of startfileArray){
+    readImports(startfile,finalAns);
+  }
 }
 
 
 
 
-export async function readImports(startfile: string) {
+export async function readImports(startfile: string,finalAns:[]) {
   try {
-    const base_path = path.join(process.cwd(), startfile);
     let importsData = [];
 
     //* make diff functions for diff. languages that do all the work of checking path and dependency, use a switch statement

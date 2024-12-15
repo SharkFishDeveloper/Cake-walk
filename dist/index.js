@@ -106,9 +106,10 @@ function handleParsedDataAfterPrompt() {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
         //* this loops all the starting files
-        for (const start of startFiles) {
-            yield (0, doSomething_1.doSomething)(start, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : []);
-        }
+        //@ts-ignore
+        let finalAns = [];
+        //@ts-ignore
+        yield (0, doSomething_1.doSomething)(startFiles, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns);
     });
 }
 //./repo/Fundrz-client/src/App.js

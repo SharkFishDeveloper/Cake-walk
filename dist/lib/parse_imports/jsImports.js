@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,32 +13,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseJsImportsDFS = exports.INITIAL_START_parseJsImports = void 0;
-const cli_color_1 = __importStar(require("cli-color"));
+const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
 function checkDependenciesInFile(importsData, proj_dependencies, regex, parent_path) {
     return __awaiter(this, void 0, void 0, function* () {
         let file_path = parent_path;
-        if (!fs_1.default.existsSync(file_path)) {
-            for (const ext of jstsExtensions_1.default) {
-                const pathChild = path_1.default.join(file_path, ext);
-                if (fs_1.default.existsSync(pathChild)) {
-                    file_path = path_1.default.join(file_path, ext);
-                    console.log((0, cli_color_1.yellowBright)("EX->", pathChild));
-                    return;
-                }
-                else {
-                    console.log((0, cli_color_1.red)("DNE", pathChild));
-                }
-            }
-        }
+        console.log((0, cli_color_1.blueBright)((0, cli_color_1.bgBlue)("<--<"), file_path.substring(43)));
         const file_content = fs_1.default.readFileSync(file_path, "utf-8");
         let match;
         while ((match = regex.exec(file_content)) !== null) {
             const imports = match[1];
             const from = match[2];
-            // Exclude imports where the "from" is in proj_dependencies
             if (!proj_dependencies.some(dep => from.startsWith(dep))) {
                 if (imports.startsWith('{')) {
                     const importsList = imports
@@ -84,26 +48,63 @@ child_path) {
     return __awaiter(this, void 0, void 0, function* () {
         let child_path_parent = path_1.default.join(process.cwd(), child_path);
         let importsInAFile = [];
-        console.log(cli_color_1.default.magentaBright(parent_path, "<<<>>>"));
-        checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_parent);
-        importsInAFile.forEach((imp, i) => {
+        console.log((0, cli_color_1.bgMagentaBright)("###############################"));
+        yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_parent);
+        for (let i = 0; i < importsInAFile.length; i++) {
+            const imp = importsInAFile[i];
             const pathChild = path_1.default.join(process.cwd(), path_1.default.dirname(child_path), imp.from);
-            // console.log(i+1,imp.from,pathChild)
-            console.log(i + 1);
-            parseJsImportsDFS(regex, proj_dependencies, pathChild);
-        });
+            yield parseJsImportsDFS(regex, proj_dependencies, pathChild);
+        }
+        // importsInAFile.forEach(async(imp,i)=>{
+        //   const pathChild = path.join(process.cwd(),path.dirname(child_path),imp.from);
+        //   await parseJsImportsDFS(regex,proj_dependencies,pathChild);
+        // })
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
 function parseJsImportsDFS(regex, proj_dependencies, parent_path) {
     return __awaiter(this, void 0, void 0, function* () {
         let importsInAFile = [];
-        checkDependenciesInFile(importsInAFile, proj_dependencies, regex, parent_path);
-        console.log(cli_color_1.default.magentaBright("parent_path", "------", parent_path, "------"));
-        importsInAFile.map((imp) => {
-            console.log(cli_color_1.default.yellowBright("CHILD", imp.imported, imp.from));
-        });
-        console.log("\n");
+        if (fs_1.default.existsSync(parent_path)) {
+            yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, parent_path);
+        }
+        else {
+            for (const ext of jstsExtensions_1.default) {
+                let pathChild = `${parent_path}${ext}`;
+                if (fs_1.default.existsSync(pathChild)) {
+                    console.log(pathChild);
+                    yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, pathChild);
+                }
+                else {
+                }
+            }
+        }
+        if (importsInAFile.length > 0) {
+            for (const imp of importsInAFile) {
+                console.log("|->", "P->", (0, cli_color_1.green)(parent_path), imp.from);
+                let child_path = path_1.default.join(path_1.default.dirname(parent_path), imp.from);
+                yield parseJsImportsDFS(regex, proj_dependencies, child_path);
+            }
+        }
     });
 }
 exports.parseJsImportsDFS = parseJsImportsDFS;
+// for (const imp of importsInAFile) {
+//     console.log("|->", "P->", green(parent_path), imp.from);
+//     let child_path = path.join(path.dirname(parent_path), imp.from);
+//     if(fs.existsSync(child_path)){
+//       await parseJsImportsDFS(regex, proj_dependencies, child_path);
+//     }
+//     else{
+//       for (const ext of TsJsextensions) {
+//         let pathChild = `${child_path}${ext}`;
+//         if(fs.existsSync(pathChild)){
+//           child_path = path.join(child_path,ext);
+//           console.log(child_path)
+//           await parseJsImportsDFS(regex,proj_dependencies,pathChild)
+//           return;
+//         }else{
+//         }
+//       }
+//     }
+//  }
