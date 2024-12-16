@@ -1,8 +1,8 @@
 interface FINAL_VIEW_INTERFACE{
-    parent_path:string,
-    parent_full_path:string,
-    full_path_child:string,
+    half_parent_path:string,
+    full_parent_path:string,
     half_path_child:string
+    full_path_child:string,
 }
 
 

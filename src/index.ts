@@ -123,7 +123,7 @@ async function handleParsedDataAfterPrompt() {
       redBright('Please fill all the dependencies in  Deepdive.yml ...')
     );
   }
-  //* this loops all the starting files
+  
     let finalAns: ImportsMap = {};
     await doSomething(startFiles, language as string, all_dependencies ?? [],finalAns);
 }

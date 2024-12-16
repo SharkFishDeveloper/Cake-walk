@@ -105,7 +105,6 @@ function handleParsedDataAfterPrompt() {
             proj_dependenciesdependencies.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
-        //* this loops all the starting files
         let finalAns = {};
         yield (0, doSomething_1.doSomething)(startFiles, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns);
     });

@@ -38,10 +38,8 @@ exports.doSomething = doSomething;
 function readImports(startfile, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let importsData = [];
             //* make diff functions for diff. languages that do all the work of checking path and dependency, use a switch statement
             //* < ----- >
-            //@ts-ignore
             yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, "START", startfile, finalAns);
             //* < ----- >
         }

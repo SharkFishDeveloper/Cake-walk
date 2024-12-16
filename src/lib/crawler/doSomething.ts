@@ -33,11 +33,8 @@ export async function doSomething(
 
 export async function readImports(startfile: string,finalAns:ImportsMap) {
   try {
-    let importsData = [];
-
     //* make diff functions for diff. languages that do all the work of checking path and dependency, use a switch statement
     //* < ----- >
-    //@ts-ignore
     await INITIAL_START_parseJsImports( regex, proj_dependencies,"START",startfile,finalAns);
     //* < ----- >
 
