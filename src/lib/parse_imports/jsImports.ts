@@ -90,7 +90,7 @@ export async function INITIAL_START_parseJsImports(
     }
     finalAns[child_path].push(DS)
     console.log(DS)
-    await parseJsImportsDFS(regex, proj_dependencies, finalAns, child_path, parent_full_path,path_Child_Complete, child_half_path);
+    await parseJsImportsDFS(regex, proj_dependencies, finalAns, path_Child_Complete, child_half_path,child_path,parent_full_path);
     break;
   }
 }
@@ -99,19 +99,19 @@ export async function parseJsImportsDFS(
   regex: RegExp,
   proj_dependencies: string[],
   finalAns:ImportsMap,
-  parent_path_node:string,
-  parent_half_path_node:string,
-  parent_full_path:string,
-  parent_half_path:string
+  node_full_path:string,
+  node_half_path:string,
+  parent_half_path:string,
+  parent_full_path:string
 ) {
 // SignUp.jsx
 let importsInAFile:JsImports[] = [];
 
-  await checkDependenciesInFile(importsInAFile,proj_dependencies,regex,parent_full_path);
+  await checkDependenciesInFile(importsInAFile,proj_dependencies,regex,node_full_path);
   
   if(importsInAFile.length > 0){
     for (const imp of importsInAFile) {
-      let child_path = path.join(path.dirname(parent_full_path), imp.from);
+      let child_path = path.join(path.dirname(node_full_path), imp.from);
         let pathChild_withExtension :string = "DNE";
         let extOfFile : string|null = null;
         if(!fs.existsSync(child_path)){
@@ -125,38 +125,38 @@ let importsInAFile:JsImports[] = [];
           }
         }          
         const half_path_child =  extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
-        console.log("Parent->",parent_half_path,"Child->",half_path_child)
+        console.log("Parent->",node_half_path,"Child->",half_path_child)
         if(pathChild_withExtension!=="DNE"){
 
           const DS = {
-            half_parent_path: parent_half_path,
-            full_parent_path: parent_full_path,
+            half_parent_path: node_half_path,
+            full_parent_path: node_full_path,
             half_path_child : half_path_child,
             full_path_child : pathChild_withExtension,
           };
 
-          if (!finalAns[parent_half_path]) {
-            finalAns[parent_half_path] = [];
+          if (!finalAns[node_half_path]) {
+            finalAns[node_half_path] = [];
           }
-          finalAns[parent_half_path].push(DS);
-          // console.log(DS)
-          await parseJsImportsDFS(regex,proj_dependencies,finalAns,pathChild_withExtension,half_path_child);
+          finalAns[node_half_path].push(DS);
+          console.log(DS)
+          // await parseJsImportsDFS(regex,proj_dependencies,finalAns,node_full_path,node_half_path,pathChild_withExtension,half_path_child);
         }
     }
   }else{
     const DS = {
-      half_parent_path: parent_half_path,
-      full_parent_path: parent_full_path,
+      half_parent_path: node_half_path,
+      full_parent_path: node_full_path,
       half_path_child : "Null",
       full_path_child : "Null",
     };
 
-    if (!finalAns[parent_half_path]) {
-      finalAns[parent_half_path] = [];
+    if (!finalAns[node_half_path]) {
+      finalAns[node_half_path] = [];
     }
-    console.log("Parent->",parent_half_path,"Child->","NULL");
+    console.log("Parent->",node_half_path,"Child->","NULL");
     // console.log(DS)
-    finalAns[parent_half_path].push(DS);
+    finalAns[node_half_path].push(DS);
   }
 }
 
