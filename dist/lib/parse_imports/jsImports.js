@@ -110,12 +110,13 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, child_half_path, 
                         }
                     }
                 }
+                //HEWLO
                 const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
                 console.log("Parent->", child_half_path, "Child->", half_path_child);
                 if (pathChild_withExtension !== "DNE") {
                     const DS = {
-                        half_parent_path: child_half_path,
-                        full_parent_path: child_full_path,
+                        half_parent_path: node_half_path,
+                        full_parent_path: node_full_path,
                         half_path_child: half_path_child,
                         full_path_child: pathChild_withExtension,
                     };
@@ -130,8 +131,8 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, child_half_path, 
         }
         else {
             const DS = {
-                half_parent_path: child_half_path,
-                full_parent_path: child_full_path,
+                half_parent_path: node_half_path,
+                full_parent_path: node_full_path,
                 half_path_child: "Null",
                 full_path_child: "Null",
             };

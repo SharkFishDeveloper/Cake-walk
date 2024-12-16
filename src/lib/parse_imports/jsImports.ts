@@ -134,8 +134,8 @@ export async function parseJsImportsDFS(
       if (pathChild_withExtension !== "DNE") {
 
         const DS = {
-          half_parent_path: child_half_path,
-          full_parent_path: child_full_path,
+          half_parent_path: node_half_path,
+          full_parent_path: node_full_path,
           half_path_child: half_path_child,
           full_path_child: pathChild_withExtension,
         };
@@ -155,8 +155,8 @@ export async function parseJsImportsDFS(
     }
   } else {
     const DS = {
-      half_parent_path: child_half_path,
-      full_parent_path: child_full_path,
+      half_parent_path: node_half_path,
+      full_parent_path: node_full_path,
       half_path_child: "Null",
       full_path_child: "Null",
     };
