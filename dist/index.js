@@ -50,7 +50,7 @@ function start() {
             }
             else {
                 //* if yml is already present, then perform this FX
-                handleParsedDataAfterPrompt();
+                yield handleParsedDataAfterPrompt();
             }
         }
         catch (error) {
@@ -107,6 +107,7 @@ function handleParsedDataAfterPrompt() {
         }
         let finalAns = {};
         yield (0, doSomething_1.doSomething)(startFiles, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns);
+        // printFinalAns(finalAns)
     });
 }
 start();

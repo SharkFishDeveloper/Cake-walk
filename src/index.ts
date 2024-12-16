@@ -8,6 +8,7 @@ import questions from './lib/util/prompt_questions.js';
 import { createSpinner } from 'nanospinner';
 import { readDependenciesFromPromt } from './lib/util/prompt_depedecy_list';
 import { doSomething } from './lib/crawler/doSomething';
+import cliColor from "cli-color"
 
 async function start() {
   try {
@@ -48,7 +49,7 @@ async function start() {
       );
     } else {
       //* if yml is already present, then perform this FX
-      handleParsedDataAfterPrompt();
+      await handleParsedDataAfterPrompt();
     }
   } catch (error) {
     console.log(red(error));
@@ -123,9 +124,11 @@ async function handleParsedDataAfterPrompt() {
       redBright('Please fill all the dependencies in  Deepdive.yml ...')
     );
   }
-  
+
     let finalAns: ImportsMap = {};
     await doSomething(startFiles, language as string, all_dependencies ?? [],finalAns);
+    // printFinalAns(finalAns)
+    
 }
 
 start();

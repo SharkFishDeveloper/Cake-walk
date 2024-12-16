@@ -15,7 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.readImports = exports.doSomething = void 0;
 const javascript_1 = __importDefault(require("../regex/javascript"));
 const jsImports_1 = require("../parse_imports/jsImports");
-const cli_color_1 = require("cli-color");
+const cli_color_1 = __importDefault(require("cli-color"));
+const cli_color_2 = require("cli-color");
+const cli_color_3 = __importDefault(require("cli-color"));
 let regex;
 let proj_dependencies;
 function doSomething(startfileArray, language, dependencies, finalAns) {
@@ -30,7 +32,7 @@ function doSomething(startfileArray, language, dependencies, finalAns) {
                 regex = javascript_1.default;
         }
         for (const startfile of startfileArray) {
-            readImports(startfile, finalAns);
+            yield readImports(startfile, finalAns);
         }
     });
 }
@@ -38,14 +40,27 @@ exports.doSomething = doSomething;
 function readImports(startfile, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            //* make diff functions for diff. languages that do all the work of checking path and dependency, use a switch statement
-            //* < ----- >
             yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, "START", startfile, finalAns);
-            //* < ----- >
+            console.log(cli_color_1.default.bold.green("Dependency Tree:"));
+            printImportsMap(finalAns);
+            // console.log("finalAns",finalAns)
         }
         catch (error) {
-            console.log((0, cli_color_1.redBright)(error));
+            console.log((0, cli_color_2.redBright)(error));
         }
     });
 }
 exports.readImports = readImports;
+function printImportsMap(data) {
+    for (const [childPath, entries] of Object.entries(data)) {
+        console.log(cli_color_3.default.bold.blue(`Child Path: ${childPath}`));
+        entries.forEach((entry, index) => {
+            console.log(cli_color_3.default.green(`  Entry ${index + 1}:`));
+            console.log(cli_color_3.default.cyan(`    Half Parent Path: ${entry.half_parent_path}`));
+            console.log(cli_color_3.default.cyan(`    Full Parent Path: ${entry.full_parent_path}`));
+            console.log(cli_color_3.default.yellow(`    Half Path Child: ${entry.half_path_child}`));
+            console.log(cli_color_3.default.yellow(`    Full Path Child: ${entry.full_path_child}`));
+            console.log(''); // Empty line for separation
+        });
+    }
+}

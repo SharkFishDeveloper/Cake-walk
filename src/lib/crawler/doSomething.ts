@@ -1,8 +1,8 @@
-import path from 'path';
 import jsRegex from '../regex/javascript';
-import fs from 'fs';
 import { INITIAL_START_parseJsImports } from '../parse_imports/jsImports';
+import cliColor, { bgWhite } from "cli-color";
 import { redBright } from 'cli-color';
+import clc from "cli-color"
 
 let regex: RegExp;
 let proj_dependencies: string[];
@@ -24,7 +24,7 @@ export async function doSomething(
       regex = jsRegex;
   }
   for(const startfile of startfileArray){
-    readImports(startfile,finalAns);
+    await readImports(startfile,finalAns);
   }
 }
 
@@ -33,12 +33,27 @@ export async function doSomething(
 
 export async function readImports(startfile: string,finalAns:ImportsMap) {
   try {
-    //* make diff functions for diff. languages that do all the work of checking path and dependency, use a switch statement
-    //* < ----- >
     await INITIAL_START_parseJsImports( regex, proj_dependencies,"START",startfile,finalAns);
-    //* < ----- >
-
+    console.log(cliColor.bold.green("Dependency Tree:"));
+    printImportsMap(finalAns);
+    // console.log("finalAns",finalAns)
   } catch (error) {
     console.log(redBright(error));
+  }
+}
+
+
+function printImportsMap(data: ImportsMap) {
+  for (const [childPath, entries] of Object.entries(data)) {
+    console.log(clc.bold.blue(`Child Path: ${childPath}`));
+    
+    entries.forEach((entry, index) => {
+      console.log(clc.green(`  Entry ${index + 1}:`));
+      console.log(clc.cyan(`    Half Parent Path: ${entry.half_parent_path}`));
+      console.log(clc.cyan(`    Full Parent Path: ${entry.full_parent_path}`));
+      console.log(clc.yellow(`    Half Path Child: ${entry.half_path_child}`));
+      console.log(clc.yellow(`    Full Path Child: ${entry.full_path_child}`));
+      console.log(''); // Empty line for separation
+    });
   }
 }

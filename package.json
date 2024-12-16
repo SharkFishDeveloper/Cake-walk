@@ -7,7 +7,7 @@
     "deepdive-cli": "./dist/index.js"
   },
   "scripts": {
-    "dev": "tsc && node ./dist/index.js",
+    "dev": "cls && tsc && node ./dist/index.js",
     "prod": "node ./dist/index.js",
     "format": "prettier --write .",
     "prepublishOnly": "npm run dev"

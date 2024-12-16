@@ -46,20 +46,23 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
     return __awaiter(this, void 0, void 0, function* () {
         let child_path_with_parent_path = path_1.default.join(process.cwd(), child_path);
         let importsInAFile = [];
-        console.log((0, cli_color_1.bgMagentaBright)("###############################"));
         const initialValues = {
             half_parent_path: "Start",
             full_parent_path: "Initial parent full path",
             half_path_child: child_path,
             full_path_child: child_path_with_parent_path
         };
-        finalAns["Start"] = [initialValues];
-        //* Get all the imports for App.js
+        if (!finalAns["Start"]) {
+            finalAns["Start"] = [];
+        }
+        finalAns["Start"].push(initialValues);
         yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
         const parent_full_path = path_1.default.join(process.cwd(), child_path);
         for (let i = 0; i < importsInAFile.length; i++) {
             const imp = importsInAFile[i];
             let extOfFile = null;
+            const child_half_path = extOfFile == null ? imp.from : `${imp.from}${extOfFile}`;
+            console.log(`Visiting, ${i + 1}`, (0, cli_color_1.magentaBright)(child_path), child_half_path);
             let path_Child_Complete = path_1.default.join(path_1.default.dirname(parent_full_path), imp.from);
             if (!fs_1.default.existsSync(path_Child_Complete)) {
                 for (const ext of jstsExtensions_1.default) {
@@ -70,27 +73,28 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
                     }
                 }
             }
-            const child_half_path = extOfFile == null ? imp.from : `${imp.from}${extOfFile}`;
-            console.log(`Visiting, ${i + 1}`, child_half_path);
             const DS = {
                 half_parent_path: child_path,
                 full_parent_path: parent_full_path,
                 half_path_child: child_half_path,
                 full_path_child: path_Child_Complete,
             };
-            finalAns[child_path] = [DS];
-            //*                                                       //Parent's full path //Parent's half path
+            if (!finalAns[child_path]) {
+                finalAns[child_path] = [];
+            }
+            finalAns[child_path].push(DS);
+            console.log(DS);
             yield parseJsImportsDFS(regex, proj_dependencies, finalAns, path_Child_Complete, child_half_path);
+            break;
         }
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
 function parseJsImportsDFS(regex, proj_dependencies, finalAns, parent_full_path, parent_half_path) {
     return __awaiter(this, void 0, void 0, function* () {
+        // SignUp.jsx
         let importsInAFile = [];
         yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, parent_full_path);
-        //* ADD IN DATA.S HERE
-        console.log(importsInAFile);
         if (importsInAFile.length > 0) {
             for (const imp of importsInAFile) {
                 let child_path = path_1.default.join(path_1.default.dirname(parent_full_path), imp.from);
@@ -107,19 +111,36 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, parent_full_path,
                     }
                 }
                 const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
-                const DS = {
-                    half_parent_path: parent_half_path,
-                    full_parent_path: parent_full_path,
-                    half_path_child: half_path_child,
-                    full_path_child: pathChild_withExtension,
-                };
-                console.log((0, cli_color_1.green)(parent_half_path, "->", half_path_child));
+                console.log("Parent->", parent_half_path, "Child->", half_path_child);
                 if (pathChild_withExtension !== "DNE") {
-                    finalAns[half_path_child] = [DS];
-                    console.log((0, cli_color_1.magentaBright)("V->", imp.from));
+                    const DS = {
+                        half_parent_path: parent_half_path,
+                        full_parent_path: parent_full_path,
+                        half_path_child: half_path_child,
+                        full_path_child: pathChild_withExtension,
+                    };
+                    if (!finalAns[parent_half_path]) {
+                        finalAns[parent_half_path] = [];
+                    }
+                    finalAns[parent_half_path].push(DS);
+                    // console.log(DS)
                     yield parseJsImportsDFS(regex, proj_dependencies, finalAns, pathChild_withExtension, half_path_child);
                 }
             }
+        }
+        else {
+            const DS = {
+                half_parent_path: parent_half_path,
+                full_parent_path: parent_full_path,
+                half_path_child: "Null",
+                full_path_child: "Null",
+            };
+            if (!finalAns[parent_half_path]) {
+                finalAns[parent_half_path] = [];
+            }
+            console.log("Parent->", parent_half_path, "Child->", "NULL");
+            // console.log(DS)
+            finalAns[parent_half_path].push(DS);
         }
     });
 }
