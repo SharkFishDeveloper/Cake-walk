@@ -34,7 +34,7 @@ export async function doSomething(
 export async function readImports(startfile: string,finalAns:ImportsMap) {
   try {
     await INITIAL_START_parseJsImports( regex, proj_dependencies,"START",startfile,finalAns);
-    console.log(cliColor.bold.green("Dependency Tree:"));
+    // console.log(cliColor.bold.green("Dependency Tree:"));
     printImportsMap(finalAns);
     // console.log("finalAns",finalAns)
   } catch (error) {
