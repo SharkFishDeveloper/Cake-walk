@@ -1,4 +1,4 @@
-import { bgBlack, blue, blueBright, magentaBright, yellow } from "cli-color";
+import { bgBlack, blue, blueBright, cyan, green, magenta, magentaBright, red, yellow } from "cli-color";
 import fs from "fs";
 import path from "path";
 import TsJsextensions from "../extensions/jstsExtensions";
@@ -56,6 +56,7 @@ export async function INITIAL_START_parseJsImports(
   if (!finalAns["Start"]) {
     finalAns["Start"] = [];
   }
+  console.log("V->",initialValues)
   finalAns["Start"].push(initialValues);
 
   await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
@@ -109,17 +110,20 @@ export async function parseJsImportsDFS(
   node_full_path: string
 ) {
   let importsInAFile: JsImports[] = [];
-  console.log(bgBlack(blueBright(node_half_path, child_half_path)))
+
+  console.log(bgBlack(yellow(node_half_path , child_half_path)))
+
   await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_full_path);
-  // console.log(importsInAFile)
 
   if (importsInAFile.length > 0) {
+    // console.log(yellow(`[FOUND IMPORTS]`), `Count:`, importsInAFile.length);
     for (const imp of importsInAFile) {
-      // console.log(yellow("For import -> ",imp.from))
+      // console.log(blue(`[IMPORT DETAILS]`), imp.from);
+      
       let child_path = path.join(path.dirname(child_full_path), imp.from);
-
       let pathChild_withExtension: string = "DNE";
       let extOfFile: string | null = null;
+
       if (!fs.existsSync(child_path)) {
         for (const ext of TsJsextensions) {
           let temp_path = `${child_path}${ext}`;
@@ -129,14 +133,17 @@ export async function parseJsImportsDFS(
             break;
           }
         }
-      }else{
+      } else {
         pathChild_withExtension = child_path;
       }
-      
-      const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
-      // console.log("Parent->", child_half_path, "Child->", half_path_child)
-      if (pathChild_withExtension !== "DNE") {
 
+      const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
+      // console.log(
+      //   magentaBright(`[CHILD NODE RESOLVED]`),
+      //   `Half Path:`, half_path_child
+      // );
+
+      if (pathChild_withExtension !== "DNE") {
         const DS = {
           half_parent_path: node_half_path,
           full_parent_path: node_full_path,
@@ -148,8 +155,17 @@ export async function parseJsImportsDFS(
           finalAns[child_half_path] = [];
         }
         finalAns[child_half_path].push(DS);
-        console.log(child_half_path ,magentaBright("=>"),DS)
-        await parseJsImportsDFS(regex, proj_dependencies, finalAns,
+
+        // console.log(
+        //   green(`[ADDED TO FINAL RESULT]`),
+        //   magenta(`Child:`), half_path_child,
+        //   `| Parent:`, node_half_path
+        // );
+
+        await parseJsImportsDFS(
+          regex,
+          proj_dependencies,
+          finalAns,
           half_path_child,
           pathChild_withExtension,
           child_half_path,
@@ -158,6 +174,8 @@ export async function parseJsImportsDFS(
       }
     }
   } else {
+    // console.log(red(`[NO IMPORTS FOUND]`), `Child:`, child_half_path);
+
     const DS = {
       half_parent_path: node_half_path,
       full_parent_path: node_full_path,
@@ -168,9 +186,12 @@ export async function parseJsImportsDFS(
     if (!finalAns[child_half_path]) {
       finalAns[child_half_path] = [];
     }
-    console.log(child_half_path ,magentaBright("=>"),DS)
     finalAns[child_half_path].push(DS);
+
+    // console.log(
+    //   green(`[LEAF NODE]`),
+    //   `Child Node:`, child_half_path,
+    //   `| Marked as Null`
+    // );
   }
 }
-
-
