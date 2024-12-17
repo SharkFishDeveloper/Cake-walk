@@ -1,4 +1,4 @@
-import { bgBlack, blue, blueBright, cyan, green, magenta, magentaBright, red, yellow } from "cli-color";
+import { bgBlack, magentaBright, yellow } from "cli-color";
 import fs from "fs";
 import path from "path";
 import TsJsextensions from "../extensions/jstsExtensions";
@@ -116,9 +116,7 @@ export async function parseJsImportsDFS(
   await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_full_path);
 
   if (importsInAFile.length > 0) {
-    // console.log(yellow(`[FOUND IMPORTS]`), `Count:`, importsInAFile.length);
     for (const imp of importsInAFile) {
-      // console.log(blue(`[IMPORT DETAILS]`), imp.from);
       
       let child_path = path.join(path.dirname(child_full_path), imp.from);
       let pathChild_withExtension: string = "DNE";
@@ -138,10 +136,6 @@ export async function parseJsImportsDFS(
       }
 
       const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
-      // console.log(
-      //   magentaBright(`[CHILD NODE RESOLVED]`),
-      //   `Half Path:`, half_path_child
-      // );
 
       if (pathChild_withExtension !== "DNE") {
         const DS = {
@@ -156,12 +150,6 @@ export async function parseJsImportsDFS(
         }
         finalAns[child_half_path].push(DS);
 
-        // console.log(
-        //   green(`[ADDED TO FINAL RESULT]`),
-        //   magenta(`Child:`), half_path_child,
-        //   `| Parent:`, node_half_path
-        // );
-
         await parseJsImportsDFS(
           regex,
           proj_dependencies,
@@ -174,7 +162,6 @@ export async function parseJsImportsDFS(
       }
     }
   } else {
-    // console.log(red(`[NO IMPORTS FOUND]`), `Child:`, child_half_path);
 
     const DS = {
       half_parent_path: node_half_path,
@@ -188,10 +175,5 @@ export async function parseJsImportsDFS(
     }
     finalAns[child_half_path].push(DS);
 
-    // console.log(
-    //   green(`[LEAF NODE]`),
-    //   `Child Node:`, child_half_path,
-    //   `| Marked as Null`
-    // );
   }
 }

@@ -16,7 +16,6 @@ exports.readImports = exports.doSomething = void 0;
 const javascript_1 = __importDefault(require("../regex/javascript"));
 const jsImports_1 = require("../parse_imports/jsImports");
 const cli_color_1 = require("cli-color");
-const cli_color_2 = __importDefault(require("cli-color"));
 let regex;
 let proj_dependencies;
 function doSomething(startfileArray, language, dependencies, finalAns) {
@@ -40,9 +39,6 @@ function readImports(startfile, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, "START", startfile, finalAns);
-            // console.log(cliColor.bold.green("Dependency Tree:"));
-            // printImportsMap(finalAns);
-            // console.log("finalAns",finalAns)
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));
@@ -50,16 +46,3 @@ function readImports(startfile, finalAns) {
     });
 }
 exports.readImports = readImports;
-function printImportsMap(data) {
-    for (const [childPath, entries] of Object.entries(data)) {
-        console.log(cli_color_2.default.bold.blue(`Child Path: ${childPath}`));
-        entries.forEach((entry, index) => {
-            console.log(cli_color_2.default.green(`  Entry ${index + 1}:`));
-            console.log(cli_color_2.default.cyan(`    Half Parent Path: ${entry.half_parent_path}`));
-            console.log(cli_color_2.default.cyan(`    Full Parent Path: ${entry.full_parent_path}`));
-            console.log(cli_color_2.default.yellow(`    Half Path Child: ${entry.half_path_child}`));
-            console.log(cli_color_2.default.yellow(`    Full Path Child: ${entry.full_path_child}`));
-            console.log(''); // Empty line for separation
-        });
-    }
-}

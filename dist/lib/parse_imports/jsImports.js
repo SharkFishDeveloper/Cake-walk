@@ -97,9 +97,7 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, child_half_path, 
         console.log((0, cli_color_1.bgBlack)((0, cli_color_1.yellow)(node_half_path, child_half_path)));
         yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_full_path);
         if (importsInAFile.length > 0) {
-            // console.log(yellow(`[FOUND IMPORTS]`), `Count:`, importsInAFile.length);
             for (const imp of importsInAFile) {
-                // console.log(blue(`[IMPORT DETAILS]`), imp.from);
                 let child_path = path_1.default.join(path_1.default.dirname(child_full_path), imp.from);
                 let pathChild_withExtension = "DNE";
                 let extOfFile = null;
@@ -117,10 +115,6 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, child_half_path, 
                     pathChild_withExtension = child_path;
                 }
                 const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
-                // console.log(
-                //   magentaBright(`[CHILD NODE RESOLVED]`),
-                //   `Half Path:`, half_path_child
-                // );
                 if (pathChild_withExtension !== "DNE") {
                     const DS = {
                         half_parent_path: node_half_path,
@@ -132,17 +126,11 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, child_half_path, 
                         finalAns[child_half_path] = [];
                     }
                     finalAns[child_half_path].push(DS);
-                    // console.log(
-                    //   green(`[ADDED TO FINAL RESULT]`),
-                    //   magenta(`Child:`), half_path_child,
-                    //   `| Parent:`, node_half_path
-                    // );
                     yield parseJsImportsDFS(regex, proj_dependencies, finalAns, half_path_child, pathChild_withExtension, child_half_path, child_full_path);
                 }
             }
         }
         else {
-            // console.log(red(`[NO IMPORTS FOUND]`), `Child:`, child_half_path);
             const DS = {
                 half_parent_path: node_half_path,
                 full_parent_path: node_full_path,
@@ -153,11 +141,6 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, child_half_path, 
                 finalAns[child_half_path] = [];
             }
             finalAns[child_half_path].push(DS);
-            // console.log(
-            //   green(`[LEAF NODE]`),
-            //   `Child Node:`, child_half_path,
-            //   `| Marked as Null`
-            // );
         }
     });
 }
