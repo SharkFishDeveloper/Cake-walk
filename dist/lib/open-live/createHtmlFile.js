@@ -17,10 +17,10 @@ const fs_1 = __importDefault(require("fs"));
 const http_1 = __importDefault(require("http"));
 const openurl_1 = require("openurl");
 const generateHtml_1 = __importDefault(require("./generateHtml"));
-function createHtmlFile(graph) {
+function createHtmlFile(graph, start) {
     return __awaiter(this, void 0, void 0, function* () {
         const htmlFilePath = './graph.html';
-        fs_1.default.writeFileSync(htmlFilePath, (0, generateHtml_1.default)(graph), 'utf8');
+        fs_1.default.writeFileSync(htmlFilePath, (0, generateHtml_1.default)(graph, start), 'utf8');
         // Serve the HTML file
         const server = http_1.default.createServer((req, res) => {
             if (req.url === '/') {

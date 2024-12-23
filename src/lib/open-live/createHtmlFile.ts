@@ -6,9 +6,9 @@ import generateHTML from "./generateHtml";
 
 
 
-async function createHtmlFile(graph:Graph) {
+async function createHtmlFile(graph:Graph,start:string) {
     const htmlFilePath = './graph.html';
-    fs.writeFileSync(htmlFilePath, generateHTML(graph), 'utf8');
+    fs.writeFileSync(htmlFilePath, generateHTML(graph,start), 'utf8');
     
 // Serve the HTML file
 const server = http.createServer((req, res) => {

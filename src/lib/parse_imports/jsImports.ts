@@ -45,63 +45,63 @@ export async function INITIAL_START_parseJsImports(
   child_path: string,
   finalAns: ImportsMap
 ) {
-  // let child_path_with_parent_path = path.join(process.cwd(), child_path);
+  let child_path_with_parent_path = path.join(process.cwd(), child_path);
 
-  // let importsInAFile: JsImports[] = [];
+  let importsInAFile: JsImports[] = [];
 
-  // const initialValues = {
-  //   half_parent_path: "Start",
-  //   full_parent_path: "Initial parent full path",
-  //   half_path_child: child_path,
-  //   full_path_child: child_path_with_parent_path
-  // };
-  // if (!finalAns["Start"]) {
-  //   finalAns["Start"] = [];
-  // }
-  // console.log("V->",initialValues)
-  // finalAns["Start"].push(initialValues);
+  const initialValues = {
+    half_parent_path: "Start",
+    full_parent_path: "Initial parent full path",
+    half_path_child: child_path,
+    full_path_child: child_path_with_parent_path
+  };
+  if (!finalAns["Start"]) {
+    finalAns["Start"] = [];
+  }
+  console.log("V->",initialValues)
+  finalAns["Start"].push(initialValues);
 
-  // await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
+  await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
 
-  // const parent_full_path = path.join(process.cwd(), child_path);
+  const parent_full_path = path.join(process.cwd(), child_path);
 
-  // for (let i = 0; i < importsInAFile.length; i++) {
-  //   // if(i!=9)continue;
-  //   const imp = importsInAFile[i];
-  //   let extOfFile: string | null = null;
-  //   const child_half_path = extOfFile == null ? imp.from : `${imp.from}${extOfFile}`;
-  //   console.log(`Visiting, ${i}`, magentaBright(child_path), child_half_path)
+  for (let i = 0; i < importsInAFile.length; i++) {
+    // if(i!=9)continue;
+    const imp = importsInAFile[i];
+    let extOfFile: string | null = null;
+    const child_half_path = extOfFile == null ? imp.from : `${imp.from}${extOfFile}`;
+    console.log(`Visiting, ${i}`, magentaBright(child_path), child_half_path)
 
-  //   let path_Child_Complete = path.join(path.dirname(parent_full_path), imp.from);
+    let path_Child_Complete = path.join(path.dirname(parent_full_path), imp.from);
 
-  //   if (!fs.existsSync(path_Child_Complete)) {
-  //     for (const ext of TsJsextensions) {
-  //       let temp_path = `${path_Child_Complete}${ext}`;
-  //       extOfFile = ext;
-  //       if (fs.existsSync(path_Child_Complete)) {
-  //         path_Child_Complete = temp_path;
-  //       }
-  //     }
-  //   }
-  //   const DS = {
-  //     half_parent_path: child_path,
-  //     full_parent_path: parent_full_path,
-  //     half_path_child: child_half_path,
-  //     full_path_child: path_Child_Complete,
-  //   };
-  //   if (!finalAns[child_path]) {
-  //     finalAns[child_path] = [];
-  //   }
-  //   finalAns[child_path].push(DS)
+    if (!fs.existsSync(path_Child_Complete)) {
+      for (const ext of TsJsextensions) {
+        let temp_path = `${path_Child_Complete}${ext}`;
+        extOfFile = ext;
+        if (fs.existsSync(path_Child_Complete)) {
+          path_Child_Complete = temp_path;
+        }
+      }
+    }
+    const DS = {
+      half_parent_path: child_path,
+      full_parent_path: parent_full_path,
+      half_path_child: child_half_path,
+      full_path_child: path_Child_Complete,
+    };
+    if (!finalAns[child_path]) {
+      finalAns[child_path] = [];
+    }
+    finalAns[child_path].push(DS)
 
-  //   await parseJsImportsDFS(regex, proj_dependencies, finalAns,
-  //     imp.imported,
-  //     child_half_path,
-  //     path_Child_Complete,
-  //     child_path,
-  //     parent_full_path,
-  //   );
-  // }
+    await parseJsImportsDFS(regex, proj_dependencies, finalAns,
+      imp.imported,
+      child_half_path,
+      path_Child_Complete,
+      child_path,
+      parent_full_path,
+    );
+  }
   let edgesA: Edge[] = [
     { parent: 'a', child: 'b', import_name: 'edge1' },
     { parent: 'b', child: 'c', import_name: 'edge2' },
@@ -111,7 +111,7 @@ export async function INITIAL_START_parseJsImports(
     { parent: 'f', child: 'c', import_name: 'edge6' },
   ];
   const graph = createGraph(edgesA);
-  await createHtmlFile(graph);
+  await createHtmlFile(graph,'a');
   console.log(graph)
 }
 

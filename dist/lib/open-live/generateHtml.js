@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const generateHTML = (graph) => `
+const generateHTML = (graph, start) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,13 +31,13 @@ const generateHTML = (graph) => `
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const nodeRadius = 20;
-    const horizontalSpacing = 100;
-    const verticalSpacing = 80;
+    const baseNodeRadius = 30;  // Base radius
+    let nodeRadius = baseNodeRadius;
+    const horizontalSpacing = 150;
+    const verticalSpacing = 100;
     let zoom = 1;
     let offsetX = 0;
     let offsetY = 0;
-
     // Tracks visibility of edges
     const visibleEdges = {};
     Object.keys(graph).forEach(parent => {
@@ -53,11 +53,17 @@ const generateHTML = (graph) => `
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = "green";
-      ctx.font = \`\${12 * zoom}px Arial\`;
+      ctx.font = \`\${16 * zoom}px Arial\`;  // Increase font size for node name
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(name, x * zoom + offsetX, y * zoom + offsetY - 10); // Node name
-      ctx.fillText(\`Import: \${import_name}\`, x * zoom + offsetX, y * zoom + offsetY + 10); // Import name
+      ctx.fillText(name, x * zoom + offsetX, y * zoom + offsetY); // Center name in the middle of node
+      
+      // Decrease font size for import statement and position it to the left
+      ctx.fillStyle = "#ffffff";
+      ctx.font = \`\${8 * zoom}px Arial\`;  // Smaller font size for import statement
+      ctx.textAlign = "left";
+      ctx.fillText(\`Import: \${import_name}\`, x * zoom + offsetX - nodeRadius, y * zoom + offsetY + nodeRadius); // Position import name on the left
+
       return { x: x * zoom + offsetX, y: y * zoom + offsetY, name };
     };
 
@@ -66,6 +72,7 @@ const generateHTML = (graph) => `
       ctx.moveTo(x1 * zoom + offsetX, y1 * zoom + offsetY);
       ctx.lineTo(x2 * zoom + offsetX, y2 * zoom + offsetY);
       ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2 * zoom;  // Adjust stroke width based on zoom level
       ctx.stroke();
     };
 
@@ -90,7 +97,6 @@ const generateHTML = (graph) => `
 
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Start from root node (a) and render all connected nodes
       return renderGraph('a', canvas.width / 2 / zoom, 50 / zoom);
     };
 
@@ -145,6 +151,11 @@ const generateHTML = (graph) => `
         } else {
           zoom /= 1.1; // Zoom out
         }
+
+        // Apply zoom limits
+        zoom = Math.max(0.1, Math.min(zoom, 3));
+
+        nodeRadius = baseNodeRadius * zoom;  // Adjust node radius based on zoom
         nodePositions = render();
       }
     });
@@ -152,6 +163,7 @@ const generateHTML = (graph) => `
     // Adjust canvas size on window resize
     window.addEventListener("resize", () => {
       canvas.width = window.innerWidth;
+      ctx.imageSmoothingEnabled = true; 
       canvas.height = window.innerHeight;
       nodePositions = render();
     });
