@@ -1,13 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// interface Edge{
-//     'parent':string,
-//     'child':string,
-//     'import_name': string;
-//   }
-//   interface Graph {
-//     [key: string]: string[];
-//   }
 const generateHTML = (graph) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -49,22 +41,23 @@ const generateHTML = (graph) => `
     // Tracks visibility of edges
     const visibleEdges = {};
     Object.keys(graph).forEach(parent => {
-      graph[parent].forEach(child => {
+      graph[parent].forEach(({ child }) => {
         visibleEdges[\`\${parent}-\${child}\`] = true;
       });
     });
 
-    const drawNode = (x, y, name) => {
+    const drawNode = (x, y, name, import_name) => {
       ctx.beginPath();
       ctx.arc(x * zoom + offsetX, y * zoom + offsetY, nodeRadius * zoom, 0, 2 * Math.PI);
       ctx.fillStyle = "#ffffff";
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = "black";
-      ctx.font = \`\${16 * zoom}px Arial\`;
+      ctx.fillStyle = "green";
+      ctx.font = \`\${12 * zoom}px Arial\`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(name, x * zoom + offsetX, y * zoom + offsetY);
+      ctx.fillText(name, x * zoom + offsetX, y * zoom + offsetY - 10); // Node name
+      ctx.fillText(\`Import: \${import_name}\`, x * zoom + offsetX, y * zoom + offsetY + 10); // Import name
       return { x: x * zoom + offsetX, y: y * zoom + offsetY, name };
     };
 
@@ -77,12 +70,12 @@ const generateHTML = (graph) => `
     };
 
     const renderGraph = (node, x, y) => {
-      const currentNode = drawNode(x, y, node);
+      const currentNode = drawNode(x, y, node, graph[node]?.[0]?.import_name || "No Import"); // Access import_name correctly
       const children = graph[node] || [];
       let childX = x - (children.length - 1) * horizontalSpacing / 2;
 
       const nodePositions = [currentNode];
-      children.forEach(child => {
+      children.forEach(({ child, import_name }) => {
         const childY = y + verticalSpacing;
         // Check if the edge is visible, otherwise skip drawing the edge
         if (visibleEdges[\`\${node}-\${child}\`]) {
@@ -113,7 +106,7 @@ const generateHTML = (graph) => `
         if (distance <= nodeRadius * zoom) {
           // Toggle visibility of edges for clicked node's children
           const children = graph[name] || [];
-          children.forEach(child => {
+          children.forEach(({ child }) => {
             visibleEdges[\`\${name}-\${child}\`] = !visibleEdges[\`\${name}-\${child}\`];
           });
           nodePositions = render();
@@ -162,7 +155,6 @@ const generateHTML = (graph) => `
       canvas.height = window.innerHeight;
       nodePositions = render();
     });
-
   </script>
 </body>
 </html>

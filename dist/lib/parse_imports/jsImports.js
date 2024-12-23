@@ -96,13 +96,13 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
         let edgesA = [
             { parent: 'a', child: 'b', import_name: 'edge1' },
             { parent: 'b', child: 'c', import_name: 'edge2' },
-            { parent: 'c', child: 'd', import_name: 'edge2' },
-            { parent: 'd', child: 'e', import_name: 'edge2' },
-            { parent: 'a', child: 'f', import_name: 'edge2' },
-            { parent: 'f', child: 'c', import_name: 'edge2' },
+            { parent: 'c', child: 'd', import_name: 'edge3' },
+            { parent: 'd', child: 'e', import_name: 'edge4' },
+            { parent: 'a', child: 'f', import_name: 'edge5' },
+            { parent: 'f', child: 'c', import_name: 'edge6' },
         ];
         const graph = createGraph(edgesA);
-        (0, createHtmlFile_1.createHtmlFile)(graph);
+        yield (0, createHtmlFile_1.createHtmlFile)(graph);
         console.log(graph);
     });
 }
@@ -165,15 +165,11 @@ exports.parseJsImportsDFS = parseJsImportsDFS;
 let edges = [];
 const createGraph = (edges) => {
     const graph = {};
-    edges.forEach(({ parent, child }) => {
-        // Initialize the graph's parent node if it doesn't exist yet
+    edges.forEach(({ parent, child, import_name }) => {
         if (!graph[parent]) {
             graph[parent] = [];
         }
-        // Only add the child node if it's not already in the parent's list
-        if (!graph[parent].includes(child)) {
-            graph[parent].push(child);
-        }
+        graph[parent].push({ child, import_name });
     });
     return graph;
 };
