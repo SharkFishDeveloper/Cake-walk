@@ -3,8 +3,10 @@ import fs from "fs";
 import path from "path";
 import TsJsextensions from "../extensions/jstsExtensions";
 import JsImports from "../interfaces/JsTsimports";
-
-
+import http from "http"
+import {open} from "openurl";
+import { Edge, Graph } from "../interfaces/Graph";
+import  { createHtmlFile } from "../open-live/createHtmlFile";
 
 async function checkDependenciesInFile(importsData: JsImports[], proj_dependencies: string[],
   regex: RegExp,
@@ -103,15 +105,14 @@ export async function INITIAL_START_parseJsImports(
   let edgesA: Edge[] = [
     { parent: 'a', child: 'b', import_name: 'edge1' },
     { parent: 'b', child: 'c', import_name: 'edge2' },
-    { parent: 'c', child: 'd', import_name: 'edge3' },
-    { parent: 'd', child: 'e', import_name: 'edge4' },
-    { parent: 'a', child: 'f', import_name: 'edge5' },
-    { parent: 'f', child: 'c', import_name: 'edge6' },
-    { parent: 'c', child: 'd', import_name: 'edge7' },
-    { parent: 'd', child: 'e', import_name: 'edge8' }
+    { parent: 'c', child: 'd', import_name: 'edge2' },
+    { parent: 'd', child: 'e', import_name: 'edge2' },
+    { parent: 'a', child: 'f', import_name: 'edge2' },
+    { parent: 'f', child: 'c', import_name: 'edge2' },
   ];
-  const ans = createGraph(edgesA);
-  console.log(ans)
+  const graph = createGraph(edgesA);
+  createHtmlFile(graph);
+  console.log(graph)
 }
 
 export async function parseJsImportsDFS(
@@ -195,18 +196,11 @@ export async function parseJsImportsDFS(
   }
 }
 
-interface Edge{
-  'parent':string,
-  'child':string,
-  'import_name': string;
-}
-interface Graph {
-  [key: string]: string[];
-}
+
 let edges:Edge[] = [];
 
 const createGraph = (edges: Edge[]): Graph => {
-  const graph: Graph = {}; // The graph will have string keys and array of strings as values
+  const graph: Graph = {}; 
 
   edges.forEach(({ parent, child }) => {
     // Initialize the graph's parent node if it doesn't exist yet
@@ -222,3 +216,4 @@ const createGraph = (edges: Edge[]): Graph => {
 
   return graph;
 };
+

@@ -16,6 +16,7 @@ exports.parseJsImportsDFS = exports.INITIAL_START_parseJsImports = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
+const createHtmlFile_1 = require("../open-live/createHtmlFile");
 function checkDependenciesInFile(importsData, proj_dependencies, regex, parent_path) {
     return __awaiter(this, void 0, void 0, function* () {
         let file_path = parent_path;
@@ -95,15 +96,14 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
         let edgesA = [
             { parent: 'a', child: 'b', import_name: 'edge1' },
             { parent: 'b', child: 'c', import_name: 'edge2' },
-            { parent: 'c', child: 'd', import_name: 'edge3' },
-            { parent: 'd', child: 'e', import_name: 'edge4' },
-            { parent: 'a', child: 'f', import_name: 'edge5' },
-            { parent: 'f', child: 'c', import_name: 'edge6' },
-            { parent: 'c', child: 'd', import_name: 'edge7' },
-            { parent: 'd', child: 'e', import_name: 'edge8' }
+            { parent: 'c', child: 'd', import_name: 'edge2' },
+            { parent: 'd', child: 'e', import_name: 'edge2' },
+            { parent: 'a', child: 'f', import_name: 'edge2' },
+            { parent: 'f', child: 'c', import_name: 'edge2' },
         ];
-        const ans = createGraph(edgesA);
-        console.log(ans);
+        const graph = createGraph(edgesA);
+        (0, createHtmlFile_1.createHtmlFile)(graph);
+        console.log(graph);
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
@@ -164,7 +164,7 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
 exports.parseJsImportsDFS = parseJsImportsDFS;
 let edges = [];
 const createGraph = (edges) => {
-    const graph = {}; // The graph will have string keys and array of strings as values
+    const graph = {};
     edges.forEach(({ parent, child }) => {
         // Initialize the graph's parent node if it doesn't exist yet
         if (!graph[parent]) {
