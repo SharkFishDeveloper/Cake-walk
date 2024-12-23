@@ -88,7 +88,11 @@ function handleParsedDataAfterPrompt() {
         let startFiles = parsedData.start;
         //@ts-ignore
         let language = parsedData.codebase;
-        if (language === null || !language || !language[0] || startFiles == null || (startFiles === null || startFiles === void 0 ? void 0 : startFiles.length) === 0) {
+        if (language === null ||
+            !language ||
+            !language[0] ||
+            startFiles == null ||
+            (startFiles === null || startFiles === void 0 ? void 0 : startFiles.length) === 0) {
             return console.log((0, cli_color_1.redBright)('Please fill properly in Deepdive.yml ...'));
         }
         let all_dependencies = [];

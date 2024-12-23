@@ -9,7 +9,7 @@ export async function doSomething(
   startfileArray: string[],
   language: string,
   dependencies: string[],
-  finalAns:ImportsMap
+  finalAns: ImportsMap
 ) {
   proj_dependencies = dependencies;
 
@@ -21,17 +21,20 @@ export async function doSomething(
     case 'ReactJs':
       regex = jsRegex;
   }
-  for(const startfile of startfileArray){
-    await readImports(startfile,finalAns);
+  for (const startfile of startfileArray) {
+    await readImports(startfile, finalAns);
   }
 }
 
-
-
-
-export async function readImports(startfile: string,finalAns:ImportsMap) {
+export async function readImports(startfile: string, finalAns: ImportsMap) {
   try {
-    await INITIAL_START_parseJsImports( regex, proj_dependencies,"START",startfile,finalAns);
+    await INITIAL_START_parseJsImports(
+      regex,
+      proj_dependencies,
+      'START',
+      startfile,
+      finalAns
+    );
   } catch (error) {
     console.log(redBright(error));
   }

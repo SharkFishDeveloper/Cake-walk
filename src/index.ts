@@ -8,7 +8,7 @@ import questions from './lib/util/prompt_questions.js';
 import { createSpinner } from 'nanospinner';
 import { readDependenciesFromPromt } from './lib/util/prompt_depedecy_list';
 import { doSomething } from './lib/crawler/doSomething';
-import cliColor from "cli-color"
+import cliColor from 'cli-color';
 
 async function start() {
   try {
@@ -56,13 +56,15 @@ async function start() {
   }
 }
 
-
-
-
-async function processDependencies(startFiles:string[],all_dependencies:string[],language:string) {
+async function processDependencies(
+  startFiles: string[],
+  all_dependencies: string[],
+  language: string
+) {
   for (const start of startFiles || []) {
     //@ts-ignore
-    const dependencies = await readDependenciesFromPromt(language as string,
+    const dependencies = await readDependenciesFromPromt(
+      language as string,
       start
     );
     all_dependencies.push(...dependencies);
@@ -85,8 +87,6 @@ async function processDependencies(startFiles:string[],all_dependencies:string[]
   return;
 }
 
-
-
 async function handleParsedDataAfterPrompt() {
   const fileContent = fs.readFileSync('deepdive.yml', 'utf8');
   const parsedData = yaml.load(fileContent);
@@ -95,21 +95,25 @@ async function handleParsedDataAfterPrompt() {
   //@ts-ignore
   let language: string | null = parsedData.codebase;
 
-  if (language === null || !language || !language[0] || startFiles==null ||startFiles?.length === 0) {
-    return console.log(
-      redBright('Please fill properly in Deepdive.yml ...')
-    );
+  if (
+    language === null ||
+    !language ||
+    !language[0] ||
+    startFiles == null ||
+    startFiles?.length === 0
+  ) {
+    return console.log(redBright('Please fill properly in Deepdive.yml ...'));
   }
 
   let all_dependencies: string[] = [];
 
   //* < ------- >
   //* this function is just for reading the starting Files and all their dependencies
-  await processDependencies(startFiles,all_dependencies,language[0]);
+  await processDependencies(startFiles, all_dependencies, language[0]);
   //* < ------- >
 
   //@ts-ignore
-  let proj_dependenciesdependencies: string[] | null = parsedData.dependencies[0];
+  let proj_dependenciesdependencies: string[] | null =parsedData.dependencies[0];
 
   if (startFiles === null || startFiles.length === 0) {
     return console.log(
@@ -125,12 +129,14 @@ async function handleParsedDataAfterPrompt() {
     );
   }
 
-    let finalAns: ImportsMap = {};
-    await doSomething(startFiles, language as string, all_dependencies ?? [],finalAns);
-    // printFinalAns(finalAns)
-    
+  let finalAns: ImportsMap = {};
+  await doSomething(
+    startFiles,
+    language as string,
+    all_dependencies ?? [],
+    finalAns
+  );
+  // printFinalAns(finalAns)
 }
 
 start();
-
-
