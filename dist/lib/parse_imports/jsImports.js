@@ -96,9 +96,9 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
             { parent: 'a', child: 'f', import_name: 'edge5' },
             // { parent: 'f', child: 'c', import_name: 'edge6' },
         ];
-        const graph = createGraph(edgesA);
-        yield (0, createHtmlFile_1.createHtmlFile)(graph, 'a');
-        console.log(graph);
+        const graph = createGraph(edges);
+        yield (0, createHtmlFile_1.createHtmlFile)(graph, child_path);
+        console.log("graph", graph);
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
@@ -164,7 +164,11 @@ const createGraph = (edges) => {
         if (!graph[parent]) {
             graph[parent] = [];
         }
-        graph[parent].push({ child, import_name });
+        // Check if the child is already in the parent's list before adding it
+        const childExists = graph[parent].some(entry => entry.child === child);
+        if (!childExists) {
+            graph[parent].push({ child, import_name });
+        }
     });
     return graph;
 };

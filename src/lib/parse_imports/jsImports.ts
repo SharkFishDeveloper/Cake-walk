@@ -110,9 +110,9 @@ export async function INITIAL_START_parseJsImports(
     { parent: 'a', child: 'f', import_name: 'edge5' },
     // { parent: 'f', child: 'c', import_name: 'edge6' },
   ];
-  const graph = createGraph(edgesA);
-  await createHtmlFile(graph,'a');
-  console.log(graph)
+  const graph = createGraph(edges);
+  await createHtmlFile(graph,child_path);
+  console.log("graph",graph)
 }
 
 export async function parseJsImportsDFS(
@@ -206,10 +206,13 @@ const createGraph = (edges: Edge[]): Graph => {
     if (!graph[parent]) {
       graph[parent] = [];
     }
-    graph[parent].push({ child, import_name });
+
+    const childExists = graph[parent].some(entry => entry.child === child);
+    if (!childExists) {
+      graph[parent].push({ child, import_name });
+    }
   });
 
   return graph;
 };
-
 
