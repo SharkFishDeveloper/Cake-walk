@@ -20,20 +20,25 @@ const inquirer_1 = __importDefault(require("inquirer"));
 const prompt_questions_js_1 = __importDefault(require("./lib/util/prompt_questions.js"));
 const prompt_depedecy_list_1 = require("./lib/util/prompt_depedecy_list");
 const doSomething_1 = require("./lib/crawler/doSomething");
+// ./repo/Fundrz-client/App.js
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             //? Add logic so it does not ask question again and agai
+            // fs.rmSync('deepdive.yml', { force: true });
             if (!fs_1.default.existsSync('deepdive.yml')) {
                 //@ts-ignore
                 const prompt_answer = yield inquirer_1.default.prompt(prompt_questions_js_1.default);
                 let dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(prompt_answer.language, prompt_answer.startPoint);
                 const ymlData = {
                     codebase: [prompt_answer.language],
-                    start: [prompt_answer.startPoint],
-                    dependencies: [dependencies],
-                    // exclude:["//eg. files or folders which you want to exclude"],
-                    // components: '',
+                    start: [
+                        {
+                            path: prompt_answer.startPoint,
+                            tag: prompt_answer.startPointTag,
+                        },
+                    ],
+                    exclude: [dependencies],
                 };
                 let yamlString = js_yaml_1.default.dump(ymlData, {
                     indent: 8,
@@ -72,7 +77,7 @@ function processDependencies(startFiles, all_dependencies, language) {
         // Step 3: Modify the specific heading (assuming the heading is a key in the object)
         if (parsedYaml && typeof parsedYaml === 'object') {
             //@ts-ignore
-            parsedYaml['dependencies'] = all_dependencies;
+            parsedYaml['exclude'] = all_dependencies;
         }
         const updatedYamlString = js_yaml_1.default.dump(parsedYaml);
         // Step 5: Write the updated YAML string back to the file
@@ -85,23 +90,28 @@ function handleParsedDataAfterPrompt() {
         const fileContent = fs_1.default.readFileSync('deepdive.yml', 'utf8');
         const parsedData = js_yaml_1.default.load(fileContent);
         //@ts-ignore
-        let startFiles = parsedData.start;
+        let dataOfYml = parsedData.start;
+        let startFiles = dataOfYml === null || dataOfYml === void 0 ? void 0 : dataOfYml.map((item) => item.path);
+        let tags = dataOfYml === null || dataOfYml === void 0 ? void 0 : dataOfYml.map((item) => item.tag);
+        // return;
         //@ts-ignore
         let language = parsedData.codebase;
-        if (language === null ||
-            !language ||
-            !language[0] ||
-            startFiles == null ||
-            (startFiles === null || startFiles === void 0 ? void 0 : startFiles.length) === 0) {
-            return console.log((0, cli_color_1.redBright)('Please fill properly in Deepdive.yml ...'));
-        }
+        // if (
+        //   language === null ||
+        //   !language ||
+        //   !language[0] ||
+        //   startFiles == null ||
+        //   startFiles?.length === 0
+        // ) {
+        //   return console.log(redBright('Please fill properly in Deepdive.yml ...'));
+        // }
         let all_dependencies = [];
         //* < ------- >
         //* this function is just for reading the starting Files and all their dependencies
         yield processDependencies(startFiles, all_dependencies, language[0]);
         //* < ------- >
         //@ts-ignore
-        let proj_dependenciesdependencies = parsedData.dependencies[0];
+        let proj_dependenciesdependencies = parsedData.exclude[0];
         if (startFiles === null || startFiles.length === 0) {
             return console.log((0, cli_color_1.redBright)('Please enter the start files in Deepdive.yml ...'));
         }
@@ -110,8 +120,7 @@ function handleParsedDataAfterPrompt() {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
         let finalAns = {};
-        yield (0, doSomething_1.doSomething)(startFiles, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns);
-        // printFinalAns(finalAns)
+        yield (0, doSomething_1.doSomething)(startFiles, tags, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns);
     });
 }
 start();

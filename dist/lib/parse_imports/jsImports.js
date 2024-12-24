@@ -17,7 +17,6 @@ const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
-const createHtmlFile_1 = require("../open-live/createHtmlFile");
 function checkDependenciesInFile(importsData, proj_dependencies, regex, parent_path) {
     return __awaiter(this, void 0, void 0, function* () {
         let file_path = parent_path;
@@ -43,10 +42,9 @@ function checkDependenciesInFile(importsData, proj_dependencies, regex, parent_p
         }
     });
 }
-function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, child_path, finalAns) {
+function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, child_path, tag, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         let child_path_with_parent_path = path_1.default.join(process.cwd(), child_path);
-        edges.push({ parent: "Start", child: child_path, import_name: "Start" });
         let importsInAFile = [];
         const initialValues = {
             half_parent_path: "Start",
@@ -61,9 +59,11 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
         finalAns["Start"].push(initialValues);
         yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
         const parent_full_path = path_1.default.join(process.cwd(), child_path);
+        edges.push({ parent: "Start", child: child_path, import_name: "Start" });
+        // edges.push({parent:child_path,child:"",import_name:"App.js"})
         for (let i = 0; i < importsInAFile.length; i++) {
-            // if(i!=9)continue;
             const imp = importsInAFile[i];
+            console.log("App.js", imp.from, imp.imported);
             let extOfFile = null;
             const child_half_path = extOfFile == null ? imp.from : `${imp.from}${extOfFile}`;
             console.log(`Visiting, ${i}`, (0, cli_color_1.magentaBright)(child_path), child_half_path);
@@ -87,29 +87,31 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
                 finalAns[child_path] = [];
             }
             finalAns[child_path].push(DS);
-            yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path);
+            yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag, imp.imported);
+            break;
         }
-        let edgesA = [
-            { parent: 'a', child: 'b', import_name: 'edge1' },
-            { parent: 'b', child: 'c', import_name: 'edge2' },
-            { parent: 'c', child: 'd', import_name: 'edge3' },
-            { parent: 'd', child: 'e', import_name: 'edge4' },
-            { parent: 'a', child: 'f', import_name: 'edge5' }
-        ];
         const graph = createGraph(edges);
-        yield (0, createHtmlFile_1.createHtmlFile)(graph, "Start");
-        console.log("graph", graph);
+        // let edgesA: Edge[] = [
+        //   { parent: 'a', child: 'b', import_name: 'edge1' },
+        //   { parent: 'b', child: 'c', import_name: 'edge2' },
+        //   { parent: 'c', child: 'd', import_name: 'edge3' },
+        //   { parent: 'd', child: 'e', import_name: 'edge4' },
+        //   { parent: 'a', child: 'f', import_name: 'edge5' }
+        // ];
+        // await createHtmlFile(graph,"Start");
+        // console.log("graph",graph)
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
-function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_half_path, child_full_path, node_half_path, node_full_path) {
+function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_half_path, child_full_path, node_half_path, node_full_path, parent_name, node_name) {
     return __awaiter(this, void 0, void 0, function* () {
         let importsInAFile = [];
         edges.push({ parent: node_half_path, child: child_half_path, import_name: childName });
-        // console.log(bgBlack(yellow(node_half_path , child_half_path,green("Imported",white(childName)),"\n")))
+        console.log((0, cli_color_1.bgBlack)((0, cli_color_1.yellow)("parent:", node_half_path, "child:", child_half_path, (0, cli_color_1.green)("import_name:", (0, cli_color_1.white)(childName)), "\n"), (0, cli_color_1.blue)("parentName: ", parent_name, node_name)));
         yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_full_path);
         if (importsInAFile.length > 0) {
             for (const imp of importsInAFile) {
+                console.log("IMP->IMPORTED", imp.imported);
                 let child_path = path_1.default.join(path_1.default.dirname(child_full_path), imp.from);
                 let pathChild_withExtension = "DNE";
                 let extOfFile = null;
@@ -138,7 +140,7 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
                         finalAns[child_half_path] = [];
                     }
                     finalAns[child_half_path].push(DS);
-                    yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path);
+                    yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path, imp.from, node_name);
                 }
             }
         }
@@ -158,7 +160,7 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
 }
 exports.parseJsImportsDFS = parseJsImportsDFS;
 let edges = [];
-const createGraph = (edges) => {
+const createGraph = (F) => {
     const graph = {};
     edges.forEach(({ parent, child, import_name }) => {
         if (!graph[parent]) {

@@ -161,7 +161,6 @@ const generateHTML = (graph, start) => `
     });
 
     canvas.addEventListener("wheel", (e) => {
-  if (e.ctrlKey) {
     e.preventDefault();
 
     const rect = canvas.getBoundingClientRect();
@@ -184,7 +183,6 @@ const generateHTML = (graph, start) => `
     nodeRadius = baseNodeRadius * zoom;
 
     nodePositions = render();
-  }
 });
 
 const resizeCanvas = () => {

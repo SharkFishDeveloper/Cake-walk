@@ -5,8 +5,10 @@ import { redBright } from 'cli-color';
 let regex: RegExp;
 let proj_dependencies: string[];
 
+
 export async function doSomething(
   startfileArray: string[],
+  tags:string[],
   language: string,
   dependencies: string[],
   finalAns: ImportsMap
@@ -20,19 +22,18 @@ export async function doSomething(
     case 'NextJs':
     case 'ReactJs':
       regex = jsRegex;
-  }
-  for (const startfile of startfileArray) {
-    await readImports(startfile, finalAns);
-  }
+
+  await readImports(startfileArray,tags ,finalAns);
+}
 }
 
-export async function readImports(startfile: string, finalAns: ImportsMap) {
+export async function readImports(startfile: string[],tag:string[],finalAns: ImportsMap) {
   try {
     await INITIAL_START_parseJsImports(
       regex,
       proj_dependencies,
-      'START',
-      startfile,
+      startfile[0],
+      tag[0],
       finalAns
     );
   } catch (error) {

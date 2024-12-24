@@ -1,4 +1,4 @@
-import { bgBlack, green, magentaBright, white, yellow } from "cli-color";
+import { bgBlack, blue, green, magentaBright, white, yellow } from "cli-color";
 import fs from "fs";
 import path from "path";
 import TsJsextensions from "../extensions/jstsExtensions";
@@ -38,18 +38,45 @@ async function checkDependenciesInFile(importsData: JsImports[], proj_dependenci
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export async function INITIAL_START_parseJsImports(
   regex: RegExp,
   proj_dependencies: string[],
-  parent_path: string,
-  child_path: string,
+  child_path: string, // starting file location eg- src/pages/App.js
+  tag:string, // starting file name eg- App.js
   finalAns: ImportsMap
 ) {
 
   let child_path_with_parent_path = path.join(process.cwd(), child_path);
 
-  edges.push({parent:"Start",child:child_path,import_name:"Start"})
-
+  
   let importsInAFile: JsImports[] = [];
 
   const initialValues = {
@@ -63,14 +90,18 @@ export async function INITIAL_START_parseJsImports(
   }
   console.log("V->",initialValues)
   finalAns["Start"].push(initialValues);
-
+  
   await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
-
+  
   const parent_full_path = path.join(process.cwd(), child_path);
 
+  edges.push({parent:"Start",child: child_path,import_name:"Start"})
+  // edges.push({parent:child_path,child:"",import_name:"App.js"})
+
+
   for (let i = 0; i < importsInAFile.length; i++) {
-    // if(i!=9)continue;
     const imp = importsInAFile[i];
+    console.log("App.js",imp.from,imp.imported)
     let extOfFile: string | null = null;
     const child_half_path = extOfFile == null ? imp.from : `${imp.from}${extOfFile}`;
     console.log(`Visiting, ${i}`, magentaBright(child_path), child_half_path)
@@ -97,24 +128,30 @@ export async function INITIAL_START_parseJsImports(
     }
     finalAns[child_path].push(DS)
 
-    await parseJsImportsDFS(regex, proj_dependencies, finalAns,
+    await parseJsImportsDFS(
+      regex, 
+      proj_dependencies, 
+      finalAns,
       imp.imported,
       child_half_path,
       path_Child_Complete,
       child_path,
       parent_full_path,
+      tag,
+      imp.imported
     );
+    break;
   }
-  let edgesA: Edge[] = [
-    { parent: 'a', child: 'b', import_name: 'edge1' },
-    { parent: 'b', child: 'c', import_name: 'edge2' },
-    { parent: 'c', child: 'd', import_name: 'edge3' },
-    { parent: 'd', child: 'e', import_name: 'edge4' },
-    { parent: 'a', child: 'f', import_name: 'edge5' }
-  ];
   const graph = createGraph(edges);
-  await createHtmlFile(graph,"Start");
-  console.log("graph",graph)
+  // let edgesA: Edge[] = [
+  //   { parent: 'a', child: 'b', import_name: 'edge1' },
+  //   { parent: 'b', child: 'c', import_name: 'edge2' },
+  //   { parent: 'c', child: 'd', import_name: 'edge3' },
+  //   { parent: 'd', child: 'e', import_name: 'edge4' },
+  //   { parent: 'a', child: 'f', import_name: 'edge5' }
+  // ];
+  // await createHtmlFile(graph,"Start");
+  // console.log("graph",graph)
 }
 
 export async function parseJsImportsDFS(
@@ -125,18 +162,22 @@ export async function parseJsImportsDFS(
   child_half_path: string,
   child_full_path: string,
   node_half_path: string,
-  node_full_path: string
+  node_full_path: string,
+  parent_name: string,
+  node_name: string
 ) {
   let importsInAFile: JsImports[] = [];
 
   edges.push({parent:node_half_path,child:child_half_path,import_name:childName})
-  // console.log(bgBlack(yellow(node_half_path , child_half_path,green("Imported",white(childName)),"\n")))
+
+  console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name,node_name),))
+
 
   await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_full_path);
 
   if (importsInAFile.length > 0) {
     for (const imp of importsInAFile) {
-      
+      console.log("IMP->IMPORTED",imp.imported)
       let child_path = path.join(path.dirname(child_full_path), imp.from);
       let pathChild_withExtension: string = "DNE";
       let extOfFile: string | null = null;
@@ -177,7 +218,9 @@ export async function parseJsImportsDFS(
           half_path_child,
           pathChild_withExtension,
           child_half_path,
-          child_full_path
+          child_full_path,
+          imp.from,
+          node_name
         );
       }
     }
@@ -199,9 +242,39 @@ export async function parseJsImportsDFS(
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 let edges:Edge[] = [];
 
-const createGraph = (edges: Edge[]): Graph => {
+const createGraph = (F: Edge[]): Graph => {
   const graph: Graph = {}; 
 
   edges.forEach(({ parent, child, import_name }) => {

@@ -18,7 +18,7 @@ const jsImports_1 = require("../parse_imports/jsImports");
 const cli_color_1 = require("cli-color");
 let regex;
 let proj_dependencies;
-function doSomething(startfileArray, language, dependencies, finalAns) {
+function doSomething(startfileArray, tags, language, dependencies, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         proj_dependencies = dependencies;
         //* add multiple switch statements for importing a particular language's REGEX
@@ -28,17 +28,15 @@ function doSomething(startfileArray, language, dependencies, finalAns) {
             case 'NextJs':
             case 'ReactJs':
                 regex = javascript_1.default;
-        }
-        for (const startfile of startfileArray) {
-            yield readImports(startfile, finalAns);
+                yield readImports(startfileArray, tags, finalAns);
         }
     });
 }
 exports.doSomething = doSomething;
-function readImports(startfile, finalAns) {
+function readImports(startfile, tag, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, 'START', startfile, finalAns);
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, 'START', startfile[0], tag[0], finalAns);
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));

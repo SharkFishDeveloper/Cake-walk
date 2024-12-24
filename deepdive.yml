@@ -1,8 +1,9 @@
 codebase:
   - ReactJs
 start:
-  - ./repo/Fundrz-client/src/App.js
-dependencies:
+  - path: ./repo/Fundrz-client/src/App.js
+    tag: App.js
+exclude:
   - react
   - react-dom
   - react-router-dom

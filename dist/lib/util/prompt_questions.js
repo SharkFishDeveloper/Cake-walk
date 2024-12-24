@@ -18,7 +18,13 @@ const questions = [
         type: 'input',
         name: 'startPoint',
         message: 'What is the starting point of your project?',
-        default: '', // Optional default value
+        default: '',
     },
+    {
+        type: 'input',
+        name: 'startPointTag',
+        message: 'What is the tag of your starting file ?',
+        default: '',
+    }
 ];
 exports.default = questions;

@@ -12,12 +12,18 @@ const questions = [
       'Rust',
     ],
   },
-  {
-    type: 'input',
-    name: 'startPoint',
-    message: 'What is the starting point of your project?',
-    default: '', // Optional default value
-  },
+ {
+  type: 'input',
+  name: 'startPoint',
+  message: 'What is the starting point of your project?',
+  default: '', 
+},
+{
+  type: 'input',
+  name: 'startPointTag',
+  message: 'What is the tag of your starting file ?',
+  default: '', 
+}
 ];
 
 export default questions;

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "cls && tsc && node ./dist/index.js",
+    "start": "tsc && node ./dist/index.js",
     "prod": "node ./dist/index.js",
     "format": "prettier --write .",
     "prepublishOnly": "npm run dev"
@@ -20,6 +21,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/js-yaml": "^4.0.9",
     "@types/open": "^6.2.1",
+    "@types/openurl": "^1.0.3",
     "cli-color": "^2.0.4",
     "inquirer": "^12.2.0",
     "js-yaml": "^4.1.0",

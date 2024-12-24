@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 
-import { greenBright, red, redBright, yellowBright } from 'cli-color';
+import { red, redBright, yellowBright } from 'cli-color';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import inquirer from 'inquirer';
 import questions from './lib/util/prompt_questions.js';
-import { createSpinner } from 'nanospinner';
 import { readDependenciesFromPromt } from './lib/util/prompt_depedecy_list';
 import { doSomething } from './lib/crawler/doSomething';
-import cliColor from 'cli-color';
-
+// ./repo/Fundrz-client/App.js
 async function start() {
   try {
     //? Add logic so it does not ask question again and agai
-
+    // fs.rmSync('deepdive.yml', { force: true });
     if (!fs.existsSync('deepdive.yml')) {
       //@ts-ignore
       const prompt_answer = await inquirer.prompt(questions);
@@ -24,10 +22,13 @@ async function start() {
       );
       const ymlData = {
         codebase: [prompt_answer.language],
-        start: [prompt_answer.startPoint],
-        dependencies: [dependencies],
-        // exclude:["//eg. files or folders which you want to exclude"],
-        // components: '',
+        start: [
+          {
+            path: prompt_answer.startPoint,
+            tag: prompt_answer.startPointTag,
+          },
+        ],
+        exclude: [dependencies],
       };
 
       let yamlString = yaml.dump(ymlData, {
@@ -78,7 +79,7 @@ async function processDependencies(
   // Step 3: Modify the specific heading (assuming the heading is a key in the object)
   if (parsedYaml && typeof parsedYaml === 'object') {
     //@ts-ignore
-    parsedYaml['dependencies'] = all_dependencies;
+    parsedYaml['exclude'] = all_dependencies;
   }
   const updatedYamlString = yaml.dump(parsedYaml);
 
@@ -91,19 +92,22 @@ async function handleParsedDataAfterPrompt() {
   const fileContent = fs.readFileSync('deepdive.yml', 'utf8');
   const parsedData = yaml.load(fileContent);
   //@ts-ignore
-  let startFiles: string[] | null = parsedData.start;
+  let dataOfYml: string[] | null = parsedData.start;
+  let startFiles: string[] = dataOfYml?.map((item: any) => item.path);
+  let tags: string[] = dataOfYml?.map((item: any) => item.tag);
+  // return;
   //@ts-ignore
   let language: string | null = parsedData.codebase;
 
-  if (
-    language === null ||
-    !language ||
-    !language[0] ||
-    startFiles == null ||
-    startFiles?.length === 0
-  ) {
-    return console.log(redBright('Please fill properly in Deepdive.yml ...'));
-  }
+  // if (
+  //   language === null ||
+  //   !language ||
+  //   !language[0] ||
+  //   startFiles == null ||
+  //   startFiles?.length === 0
+  // ) {
+  //   return console.log(redBright('Please fill properly in Deepdive.yml ...'));
+  // }
 
   let all_dependencies: string[] = [];
 
@@ -113,7 +117,7 @@ async function handleParsedDataAfterPrompt() {
   //* < ------- >
 
   //@ts-ignore
-  let proj_dependenciesdependencies: string[] | null =parsedData.dependencies[0];
+  let proj_dependenciesdependencies: string[] | null = parsedData.exclude[0];
 
   if (startFiles === null || startFiles.length === 0) {
     return console.log(
@@ -128,15 +132,15 @@ async function handleParsedDataAfterPrompt() {
       redBright('Please fill all the dependencies in  Deepdive.yml ...')
     );
   }
-
   let finalAns: ImportsMap = {};
+
   await doSomething(
     startFiles,
+    tags,
     language as string,
     all_dependencies ?? [],
     finalAns
   );
-  // printFinalAns(finalAns)
 }
 
 start();
