@@ -17,56 +17,21 @@ const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
-function checkDependenciesInFile(importsData, proj_dependencies, regex, parent_path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let file_path = parent_path;
-        const file_content = fs_1.default.readFileSync(file_path, "utf-8");
-        let match;
-        while ((match = regex.exec(file_content)) !== null) {
-            const imports = match[1];
-            const from = match[2];
-            if (!proj_dependencies.some(dep => from.startsWith(dep))) {
-                if (imports.startsWith('{')) {
-                    const importsList = imports
-                        .replace(/[{}]/g, '')
-                        .split(',')
-                        .map((item) => item.trim());
-                    importsList.forEach((imp) => {
-                        importsData.push({ imported: imp, from });
-                    });
-                }
-                else {
-                    importsData.push({ imported: imports, from });
-                }
-            }
-        }
-    });
-}
-function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, child_path, tag, finalAns) {
+const read_dep_in_files_1 = require("../read_dependencies/read-dep-in-files");
+function INITIAL_START_parseJsImports(regex, proj_dependencies, child_path, // starting file location eg- src/pages/App.js
+tag, // starting file name eg- App.js
+finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         let child_path_with_parent_path = path_1.default.join(process.cwd(), child_path);
         let importsInAFile = [];
-        const initialValues = {
-            half_parent_path: "Start",
-            full_parent_path: "Initial parent full path",
-            half_path_child: child_path,
-            full_path_child: child_path_with_parent_path
-        };
-        if (!finalAns["Start"]) {
-            finalAns["Start"] = [];
-        }
-        console.log("V->", initialValues);
-        finalAns["Start"].push(initialValues);
-        yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
+        yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
         const parent_full_path = path_1.default.join(process.cwd(), child_path);
+        // adapt this for multiple starting files
         edges.push({ parent: "Start", child: child_path, import_name: "Start" });
-        // edges.push({parent:child_path,child:"",import_name:"App.js"})
         for (let i = 0; i < importsInAFile.length; i++) {
             const imp = importsInAFile[i];
-            console.log("App.js", imp.from, imp.imported);
             let extOfFile = null;
             const child_half_path = extOfFile == null ? imp.from : `${imp.from}${extOfFile}`;
-            console.log(`Visiting, ${i}`, (0, cli_color_1.magentaBright)(child_path), child_half_path);
             let path_Child_Complete = path_1.default.join(path_1.default.dirname(parent_full_path), imp.from);
             if (!fs_1.default.existsSync(path_Child_Complete)) {
                 for (const ext of jstsExtensions_1.default) {
@@ -77,16 +42,6 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
                     }
                 }
             }
-            const DS = {
-                half_parent_path: child_path,
-                full_parent_path: parent_full_path,
-                half_path_child: child_half_path,
-                full_path_child: path_Child_Complete,
-            };
-            if (!finalAns[child_path]) {
-                finalAns[child_path] = [];
-            }
-            finalAns[child_path].push(DS);
             yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag, imp.imported);
             break;
         }
@@ -108,10 +63,9 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
         let importsInAFile = [];
         edges.push({ parent: node_half_path, child: child_half_path, import_name: childName });
         console.log((0, cli_color_1.bgBlack)((0, cli_color_1.yellow)("parent:", node_half_path, "child:", child_half_path, (0, cli_color_1.green)("import_name:", (0, cli_color_1.white)(childName)), "\n"), (0, cli_color_1.blue)("parentName: ", parent_name, node_name)));
-        yield checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_full_path);
+        yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_full_path);
         if (importsInAFile.length > 0) {
             for (const imp of importsInAFile) {
-                console.log("IMP->IMPORTED", imp.imported);
                 let child_path = path_1.default.join(path_1.default.dirname(child_full_path), imp.from);
                 let pathChild_withExtension = "DNE";
                 let extOfFile = null;
@@ -130,31 +84,9 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
                 }
                 const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
                 if (pathChild_withExtension !== "DNE") {
-                    const DS = {
-                        half_parent_path: node_half_path,
-                        full_parent_path: node_full_path,
-                        half_path_child: half_path_child,
-                        full_path_child: pathChild_withExtension,
-                    };
-                    if (!finalAns[child_half_path]) {
-                        finalAns[child_half_path] = [];
-                    }
-                    finalAns[child_half_path].push(DS);
                     yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path, imp.from, node_name);
                 }
             }
-        }
-        else {
-            const DS = {
-                half_parent_path: node_half_path,
-                full_parent_path: node_full_path,
-                half_path_child: "Null",
-                full_path_child: "Null",
-            };
-            if (!finalAns[child_half_path]) {
-                finalAns[child_half_path] = [];
-            }
-            finalAns[child_half_path].push(DS);
         }
     });
 }

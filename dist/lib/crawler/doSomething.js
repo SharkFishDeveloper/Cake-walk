@@ -36,7 +36,7 @@ exports.doSomething = doSomething;
 function readImports(startfile, tag, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, 'START', startfile[0], tag[0], finalAns);
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile[0], tag[0], finalAns);
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));
