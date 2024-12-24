@@ -6,7 +6,7 @@ const generateHTML = (graph: Graph, start: string): string => `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Graph Visualization</title>
+  <title>Deepdive Visualiser</title>
   <style>
     body, html {
       margin: 0;
@@ -64,7 +64,7 @@ const generateHTML = (graph: Graph, start: string): string => `
       ctx.font = \`\${8 * zoom}px Arial\`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(name, x * zoom + offsetX, y * zoom + offsetY);
+      ctx.fillText(import_name, x * zoom + offsetX, y * zoom + offsetY);
 
       // Display number of children on the left side
       ctx.fillStyle = "#ffffff";
@@ -76,7 +76,7 @@ const generateHTML = (graph: Graph, start: string): string => `
       ctx.fillStyle = "#ffffff";
       ctx.font = \`\${6 * zoom}px Arial\`;
       ctx.textAlign = "right";
-      ctx.fillText(\`\Import: \${import_name}\`, x * zoom + offsetX - nodeRadius - 30, y * zoom + offsetY + 12);
+      ctx.fillText(\`\Import: \${name}\`, x * zoom + offsetX - nodeRadius - 30, y * zoom + offsetY + 12);
 
       return { x: x * zoom + offsetX, y: y * zoom + offsetY, name };
     };

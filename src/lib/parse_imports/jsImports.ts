@@ -45,7 +45,10 @@ export async function INITIAL_START_parseJsImports(
   child_path: string,
   finalAns: ImportsMap
 ) {
+
   let child_path_with_parent_path = path.join(process.cwd(), child_path);
+
+  edges.push({parent:"Start",child:child_path,import_name:"Start"})
 
   let importsInAFile: JsImports[] = [];
 
@@ -107,11 +110,10 @@ export async function INITIAL_START_parseJsImports(
     { parent: 'b', child: 'c', import_name: 'edge2' },
     { parent: 'c', child: 'd', import_name: 'edge3' },
     { parent: 'd', child: 'e', import_name: 'edge4' },
-    { parent: 'a', child: 'f', import_name: 'edge5' },
-    // { parent: 'f', child: 'c', import_name: 'edge6' },
+    { parent: 'a', child: 'f', import_name: 'edge5' }
   ];
   const graph = createGraph(edges);
-  await createHtmlFile(graph,child_path);
+  await createHtmlFile(graph,"Start");
   console.log("graph",graph)
 }
 

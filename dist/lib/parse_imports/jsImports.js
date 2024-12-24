@@ -46,6 +46,7 @@ function checkDependenciesInFile(importsData, proj_dependencies, regex, parent_p
 function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, child_path, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         let child_path_with_parent_path = path_1.default.join(process.cwd(), child_path);
+        edges.push({ parent: "Start", child: child_path, import_name: "Start" });
         let importsInAFile = [];
         const initialValues = {
             half_parent_path: "Start",
@@ -93,11 +94,10 @@ function INITIAL_START_parseJsImports(regex, proj_dependencies, parent_path, chi
             { parent: 'b', child: 'c', import_name: 'edge2' },
             { parent: 'c', child: 'd', import_name: 'edge3' },
             { parent: 'd', child: 'e', import_name: 'edge4' },
-            { parent: 'a', child: 'f', import_name: 'edge5' },
-            // { parent: 'f', child: 'c', import_name: 'edge6' },
+            { parent: 'a', child: 'f', import_name: 'edge5' }
         ];
         const graph = createGraph(edges);
-        yield (0, createHtmlFile_1.createHtmlFile)(graph, child_path);
+        yield (0, createHtmlFile_1.createHtmlFile)(graph, "Start");
         console.log("graph", graph);
     });
 }
@@ -164,7 +164,6 @@ const createGraph = (edges) => {
         if (!graph[parent]) {
             graph[parent] = [];
         }
-        // Check if the child is already in the parent's list before adding it
         const childExists = graph[parent].some(entry => entry.child === child);
         if (!childExists) {
             graph[parent].push({ child, import_name });
