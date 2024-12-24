@@ -27,7 +27,7 @@ finalAns) {
         yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
         const parent_full_path = path_1.default.join(process.cwd(), child_path);
         // adapt this for multiple starting files
-        edges.push({ parent: "Start", child: child_path, import_name: "App.js", parent_path: "Start" });
+        // edges.push({parent:"Start",child: child_path,import_name:"Start",parent_path:"Start"})
         for (let i = 0; i < importsInAFile.length; i++) {
             const imp = importsInAFile[i];
             let extOfFile = null;
@@ -53,7 +53,7 @@ finalAns) {
         //   { parent: 'd', child: 'e', import_name: 'edge4' },
         //   { parent: 'a', child: 'f', import_name: 'edge5' }
         // ];
-        yield (0, createHtmlFile_1.createHtmlFile)(graph, "Start");
+        yield (0, createHtmlFile_1.createHtmlFile)(graph, "App.js");
         console.log("graph", graph);
     });
 }
@@ -62,7 +62,7 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
     return __awaiter(this, void 0, void 0, function* () {
         let importsInAFile = [];
         // console.log(node_half_path,magenta("->"),parent_name,yellow("->"),child_half_path,childName)
-        edges.push({ parent: node_half_path, child: child_half_path, import_name: childName, parent_path: parent_name });
+        edges.push({ parent: parent_name, child: child_half_path, import_name: childName, parent_path: node_half_path });
         // console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name),))
         yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_full_path);
         if (importsInAFile.length > 0) {
