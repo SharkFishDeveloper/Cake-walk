@@ -108,7 +108,7 @@ export async function INITIAL_START_parseJsImports(
     { parent: 'c', child: 'd', import_name: 'edge3' },
     { parent: 'd', child: 'e', import_name: 'edge4' },
     { parent: 'a', child: 'f', import_name: 'edge5' },
-    { parent: 'f', child: 'c', import_name: 'edge6' },
+    // { parent: 'f', child: 'c', import_name: 'edge6' },
   ];
   const graph = createGraph(edgesA);
   await createHtmlFile(graph,'a');
