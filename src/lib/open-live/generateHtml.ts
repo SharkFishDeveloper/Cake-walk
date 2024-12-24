@@ -1,7 +1,5 @@
 import { Graph } from "../interfaces/Graph";
 
-
-
 const generateHTML = (graph: Graph, start: string): string => `
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +15,7 @@ const generateHTML = (graph: Graph, start: string): string => `
     }
     canvas {
       display: block;
-      background-color: #111211;
+      background-color: #6448c2;
       border: 1px solid black;
     }
   </style>
@@ -31,10 +29,10 @@ const generateHTML = (graph: Graph, start: string): string => `
     const ctx = canvas.getContext("2d");
 
     // Initial canvas size
-    canvas.width = window.innerWidth;  // Set canvas to the window width
+    canvas.width = window.innerWidth;
     canvas.height = window.innerHeight; 
 
-    const baseNodeRadius = 30;
+    const baseNodeRadius = 5;
     let nodeRadius = baseNodeRadius;
     const horizontalSpacing = 150;
     const verticalSpacing = 100;
@@ -46,14 +44,13 @@ const generateHTML = (graph: Graph, start: string): string => `
     const visibleEdges = {};
     Object.keys(graph).forEach(parent => {
       graph[parent].forEach(({ child }) => {
-        visibleEdges[\`\${parent}-\${child}\`] = false;  // Initially, hide all edges
+        visibleEdges[\`\${parent}-\${child}\`] = false;
       });
     });
 
-    // Make edges from the start node visible initially
     if (graph[startNode]) {
       graph[startNode].forEach(({ child }) => {
-        visibleEdges[\`\${startNode}-\${child}\`] = true;  // Show only direct children of the start node
+        visibleEdges[\`\${startNode}-\${child}\`] = true;
       });
     }
 
@@ -64,22 +61,22 @@ const generateHTML = (graph: Graph, start: string): string => `
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = "green";
-      ctx.font = \`\${16 * zoom}px Arial\`;
+      ctx.font = \`\${8 * zoom}px Arial\`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(name, x * zoom + offsetX, y * zoom + offsetY);
 
-      // Display number of children
+      // Display number of children on the left side
       ctx.fillStyle = "#ffffff";
-      ctx.font = \`\${8 * zoom}px Arial\`;
-      ctx.textAlign = "center";
-      ctx.fillText(\`Children: \${childCount}\`, x * zoom + offsetX, y * zoom + offsetY + nodeRadius + 10);
+      ctx.font = \`\${4 * zoom}px Arial\`;
+      ctx.textAlign = "right";
+      ctx.fillText(\`\Children: \${childCount}\`, x * zoom + offsetX - nodeRadius - 30, y * zoom + offsetY);
 
-      // Display import name
+      // Display import name on the left side
       ctx.fillStyle = "#ffffff";
-      ctx.font = \`\${8 * zoom}px Arial\`;
-      ctx.textAlign = "left";
-      ctx.fillText(\`Import: \${import_name}\`, x * zoom + offsetX - nodeRadius, y * zoom + offsetY + nodeRadius);
+      ctx.font = \`\${6 * zoom}px Arial\`;
+      ctx.textAlign = "right";
+      ctx.fillText(\`\Import: \${import_name}\`, x * zoom + offsetX - nodeRadius - 30, y * zoom + offsetY + 12);
 
       return { x: x * zoom + offsetX, y: y * zoom + offsetY, name };
     };
@@ -94,15 +91,14 @@ const generateHTML = (graph: Graph, start: string): string => `
     };
 
     const renderGraph = (node, x, y) => {
-      const currentNode = drawNode(x, y, node, graph[node]?.[0]?.import_name || "No Import", graph[node]?.length || 0); // Pass the child count
+      const currentNode = drawNode(x, y, node, graph[node]?.[0]?.import_name || "No Import", graph[node]?.length || 0);
       const children = graph[node] || [];
       let childX = x - (children.length - 1) * horizontalSpacing / 2;
 
       const nodePositions = [currentNode];
       children.forEach(({ child, import_name }) => {
         const childY = y + verticalSpacing;
-        
-        // Check if the edge is visible (only show edges for direct children initially)
+
         if (visibleEdges[\`\${node}-\${child}\`]) {
           drawEdge(x, y, childX, childY);
           nodePositions.push(...renderGraph(child, childX, childY));
@@ -115,7 +111,6 @@ const generateHTML = (graph: Graph, start: string): string => `
 
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      console.log("Rendering graph from start node:", startNode);
       if (graph[startNode]) {
         return renderGraph(startNode, canvas.width / 2 / zoom, 50 / zoom);
       } else {
@@ -136,9 +131,9 @@ const generateHTML = (graph: Graph, start: string): string => `
         if (distance <= nodeRadius * zoom) {
           const children = graph[name] || [];
           children.forEach(({ child }) => {
-            visibleEdges[\`\${name}-\${child}\`] = !visibleEdges[\`\${name}-\${child}\`];  // Toggle the visibility of children
+            visibleEdges[\`\${name}-\${child}\`] = !visibleEdges[\`\${name}-\${child}\`];
           });
-          nodePositions = render();  // Re-render the graph after toggling the visibility
+          nodePositions = render();
         }
       });
     });
@@ -157,7 +152,7 @@ const generateHTML = (graph: Graph, start: string): string => `
       if (isDragging) {
         offsetX = e.clientX - startX;
         offsetY = e.clientY - startY;
-        nodePositions = render();  // Re-render after dragging
+        nodePositions = render();
       }
     });
 
@@ -166,35 +161,51 @@ const generateHTML = (graph: Graph, start: string): string => `
     });
 
     canvas.addEventListener("wheel", (e) => {
-      if (e.ctrlKey) {
-        e.preventDefault();
+  if (e.ctrlKey) {
+    e.preventDefault();
 
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left; // Mouse position relative to the canvas
-        const mouseY = e.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
 
-        const mouseXWorld = (mouseX - offsetX) / zoom; // Mouse X in graph world coordinates
-        const mouseYWorld = (mouseY - offsetY) / zoom; // Mouse Y in graph world coordinates
+    // Convert mouse position to world coordinates (canvas coordinate system before zoom)
+    const mouseXWorld = (mouseX - offsetX) / zoom;
+    const mouseYWorld = (mouseY - offsetY) / zoom;
 
-        // Update zoom level
-        const zoomFactor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
-        const newZoom = Math.max(0.1, Math.min(zoom * zoomFactor, 3));
+    // Smooth zooming factor (adjust as necessary)
+    const zoomFactor = e.deltaY < 0 ? 1.05 : 0.95; // Decrease zoom speed for smoother experience
+    const newZoom = Math.max(0.1, Math.min(zoom * zoomFactor, 3));
 
-        // Adjust offset to keep the mouse position stable during zoom
-        offsetX -= mouseXWorld * (newZoom - zoom);
-        offsetY -= mouseYWorld * (newZoom - zoom);
+    // Adjust the offset to zoom around the mouse position
+    offsetX -= mouseXWorld * (newZoom - zoom);
+    offsetY -= mouseYWorld * (newZoom - zoom);
 
-        zoom = newZoom;
-        nodeRadius = baseNodeRadius * zoom;
-        nodePositions = render();  // Re-render after zoom
-      }
-    });
+    zoom = newZoom;
+    nodeRadius = baseNodeRadius * zoom;
 
-    window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      nodePositions = render();  // Re-render after window resize
-    });
+    nodePositions = render();
+  }
+});
+
+const resizeCanvas = () => {
+  const pixelRatio = window.devicePixelRatio || 1;
+
+  canvas.width = window.innerWidth * pixelRatio;
+  canvas.height = window.innerHeight * pixelRatio;
+
+  canvas.style.width = \`$\{window.innerWidth}px\`;
+  canvas.style.height = \`\${window.innerHeight}px\`;
+
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+};
+
+resizeCanvas();
+nodePositions = render();
+
+window.addEventListener("resize", () => {
+  resizeCanvas();
+  nodePositions = render();
+});
 
     console.log("Graph data:", graph);
     console.log("Start node:", startNode);
