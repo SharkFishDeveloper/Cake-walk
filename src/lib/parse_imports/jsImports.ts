@@ -1,13 +1,11 @@
-import { bgBlack, blue, green, magentaBright, white, yellow } from "cli-color";
+import { bgBlack, blue, green, magenta, white, yellow } from "cli-color";
 import fs from "fs";
 import path from "path";
 import TsJsextensions from "../extensions/jstsExtensions";
 import JsImports from "../interfaces/JsTsimports";
-import http from "http"
-import {open} from "openurl";
 import { Edge, Graph } from "../interfaces/Graph";
-import  { createHtmlFile } from "../open-live/createHtmlFile";
 import { checkDependenciesInFile } from "../read_dependencies/read-dep-in-files";
+import { createHtmlFile } from "../open-live/createHtmlFile";
 
 
 
@@ -30,7 +28,7 @@ export async function INITIAL_START_parseJsImports(
   const parent_full_path = path.join(process.cwd(), child_path);
 
   // adapt this for multiple starting files
-  edges.push({parent:"Start",child: child_path,import_name:"Start"})
+  edges.push({parent:"Start",child: child_path,import_name:"App.js",parent_path:"Start"})
 
 
   for (let i = 0; i < importsInAFile.length; i++) {
@@ -60,7 +58,6 @@ export async function INITIAL_START_parseJsImports(
       child_path,
       parent_full_path,
       tag,
-      imp.imported
     );
     break;
   }
@@ -72,8 +69,8 @@ export async function INITIAL_START_parseJsImports(
   //   { parent: 'd', child: 'e', import_name: 'edge4' },
   //   { parent: 'a', child: 'f', import_name: 'edge5' }
   // ];
-  // await createHtmlFile(graph,"Start");
-  // console.log("graph",graph)
+  await createHtmlFile(graph,"Start");
+  console.log("graph",graph)
 }
 
 export async function parseJsImportsDFS(
@@ -86,13 +83,12 @@ export async function parseJsImportsDFS(
   node_half_path: string,
   node_full_path: string,
   parent_name: string,
-  node_name: string
 ) {
   let importsInAFile: JsImports[] = [];
+  // console.log(node_half_path,magenta("->"),parent_name,yellow("->"),child_half_path,childName)
+  edges.push({parent:node_half_path,child:child_half_path,import_name:childName,parent_path:parent_name})
 
-  edges.push({parent:node_half_path,child:child_half_path,import_name:childName})
-
-  console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name,node_name),))
+  // console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name),))
 
 
   await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_full_path);
@@ -129,8 +125,7 @@ export async function parseJsImportsDFS(
           pathChild_withExtension,
           child_half_path,
           child_full_path,
-          imp.from,
-          node_name
+          childName
         );
       }
     }
@@ -173,14 +168,14 @@ let edges:Edge[] = [];
 const createGraph = (F: Edge[]): Graph => {
   const graph: Graph = {}; 
 
-  edges.forEach(({ parent, child, import_name }) => {
+  edges.forEach(({ parent, child, import_name,parent_path }) => {
     if (!graph[parent]) {
       graph[parent] = [];
     }
 
     const childExists = graph[parent].some(entry => entry.child === child);
     if (!childExists) {
-      graph[parent].push({ child, import_name });
+      graph[parent].push({ child, import_name,parent_path });
     }
   });
 

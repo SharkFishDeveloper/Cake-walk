@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseJsImportsDFS = exports.INITIAL_START_parseJsImports = void 0;
-const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
 const read_dep_in_files_1 = require("../read_dependencies/read-dep-in-files");
+const createHtmlFile_1 = require("../open-live/createHtmlFile");
 function INITIAL_START_parseJsImports(regex, proj_dependencies, child_path, // starting file location eg- src/pages/App.js
 tag, // starting file name eg- App.js
 finalAns) {
@@ -27,7 +27,7 @@ finalAns) {
         yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
         const parent_full_path = path_1.default.join(process.cwd(), child_path);
         // adapt this for multiple starting files
-        edges.push({ parent: "Start", child: child_path, import_name: "Start" });
+        edges.push({ parent: "Start", child: child_path, import_name: "App.js", parent_path: "Start" });
         for (let i = 0; i < importsInAFile.length; i++) {
             const imp = importsInAFile[i];
             let extOfFile = null;
@@ -42,7 +42,7 @@ finalAns) {
                     }
                 }
             }
-            yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag, imp.imported);
+            yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag);
             break;
         }
         const graph = createGraph(edges);
@@ -53,16 +53,17 @@ finalAns) {
         //   { parent: 'd', child: 'e', import_name: 'edge4' },
         //   { parent: 'a', child: 'f', import_name: 'edge5' }
         // ];
-        // await createHtmlFile(graph,"Start");
-        // console.log("graph",graph)
+        yield (0, createHtmlFile_1.createHtmlFile)(graph, "Start");
+        console.log("graph", graph);
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
-function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_half_path, child_full_path, node_half_path, node_full_path, parent_name, node_name) {
+function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_half_path, child_full_path, node_half_path, node_full_path, parent_name) {
     return __awaiter(this, void 0, void 0, function* () {
         let importsInAFile = [];
-        edges.push({ parent: node_half_path, child: child_half_path, import_name: childName });
-        console.log((0, cli_color_1.bgBlack)((0, cli_color_1.yellow)("parent:", node_half_path, "child:", child_half_path, (0, cli_color_1.green)("import_name:", (0, cli_color_1.white)(childName)), "\n"), (0, cli_color_1.blue)("parentName: ", parent_name, node_name)));
+        // console.log(node_half_path,magenta("->"),parent_name,yellow("->"),child_half_path,childName)
+        edges.push({ parent: node_half_path, child: child_half_path, import_name: childName, parent_path: parent_name });
+        // console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name),))
         yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_full_path);
         if (importsInAFile.length > 0) {
             for (const imp of importsInAFile) {
@@ -84,7 +85,7 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
                 }
                 const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
                 if (pathChild_withExtension !== "DNE") {
-                    yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path, imp.from, node_name);
+                    yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path, childName);
                 }
             }
         }
@@ -94,13 +95,13 @@ exports.parseJsImportsDFS = parseJsImportsDFS;
 let edges = [];
 const createGraph = (F) => {
     const graph = {};
-    edges.forEach(({ parent, child, import_name }) => {
+    edges.forEach(({ parent, child, import_name, parent_path }) => {
         if (!graph[parent]) {
             graph[parent] = [];
         }
         const childExists = graph[parent].some(entry => entry.child === child);
         if (!childExists) {
-            graph[parent].push({ child, import_name });
+            graph[parent].push({ child, import_name, parent_path });
         }
     });
     return graph;
