@@ -17,7 +17,6 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
 const read_dep_in_files_1 = require("../read_dependencies/read-dep-in-files");
-const createHtmlFile_1 = require("../open-live/createHtmlFile");
 function INITIAL_START_parseJsImports(regex, proj_dependencies, child_path, // starting file location eg- src/pages/App.js
 tag, // starting file name eg- App.js
 finalAns) {
@@ -41,7 +40,7 @@ finalAns) {
                 }
             }
             yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag);
-            // break;
+            break;
         }
         const graph = createGraph(edges);
         // const edgesTemp ={
@@ -54,8 +53,9 @@ finalAns) {
         // ]
         // }
         // const graphA = createGraph(graph);
-        yield (0, createHtmlFile_1.createHtmlFile)(graph, tag);
+        // await createHtmlFile(graph,tag);
         console.log("graph", graph);
+        logGraph(graph);
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
@@ -93,6 +93,34 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
     });
 }
 exports.parseJsImportsDFS = parseJsImportsDFS;
+function logGraph(graph) {
+    const visited = new Set(); // To track the nodes we've already printed
+    function printNode(node, indent = "", isLast = true) {
+        if (visited.has(node))
+            return; // Skip if the node was already printed
+        visited.add(node); // Mark the current node as visited after printing
+        // Print the current node
+        console.log(`${indent}${node}`);
+        if (graph[node]) {
+            graph[node].forEach((importData, index) => {
+                const isLastChild = index === graph[node].length - 1;
+                const newIndent = `${indent}${isLast ? "    " : "|   "}`;
+                const connector = isLast ? "└── " : "├── ";
+                // Print the child node with the appropriate connector
+                console.log(`${newIndent}${connector}${importData.import_name} (imported from ${importData.child})`);
+                // Recursively print the children
+                printNode(importData.import_name, newIndent, isLastChild);
+            });
+        }
+    }
+    console.log("graph:");
+    for (const node in graph) {
+        // Only print the node once and skip the recursion if the node is already visited
+        if (!visited.has(node)) {
+            printNode(node);
+        }
+    }
+}
 let edges = [];
 const createGraph = (F) => {
     const graph = {};

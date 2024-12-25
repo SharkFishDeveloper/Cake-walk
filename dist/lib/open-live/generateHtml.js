@@ -40,7 +40,7 @@ const generateHTML = (graph, start) => `
         let offsetX = 0;
         let offsetY = 0;
         let zoom = 1; // Zoom level (1 is the default)
-        const nodeVisibility = {}; // To track visibility of nodes
+        const nodeVisibility = {}; // To track visibility of nodes (initialize to false for all)
 
         // Resize the canvas to fill the entire screen
         function resizeCanvas() {
@@ -51,7 +51,7 @@ const generateHTML = (graph, start) => `
         // Helper function to draw the nodes and connections
         function drawTree(node, x, y, parentPath, level = 0) {
             // Draw the current node if it is visible
-            if (nodeVisibility[node.name] === false) {
+            if (nodeVisibility[node.name + node.path] === false) {
                 return;
             }
 
@@ -74,11 +74,11 @@ const generateHTML = (graph, start) => `
             let childX = x - (children.length - 1) * HORIZONTAL_SPACING / 2;
 
             children.forEach(child => {
-                const childNode = { name: child.import_name };
+                const childNode = { name: child.import_name, path: child.path };
                 const childY = y + VERTICAL_SPACING;
 
                 // Only draw children if they are visible
-                if (nodeVisibility[childNode.name] !== false) {
+                if (nodeVisibility[childNode.name + childNode.path] !== false) {
                     // Draw a line from parent to child
                     ctx.beginPath();
                     ctx.moveTo(x + NODE_WIDTH / 2, y + NODE_HEIGHT);
@@ -103,7 +103,7 @@ const generateHTML = (graph, start) => `
             ctx.translate(offsetX, offsetY);  // Apply the current offset (for dragging)
             ctx.scale(zoom, zoom);  // Apply zoom scale to the entire tree
 
-            const rootNode = { name: 'App.js' };  // Root node (start of the tree)
+            const rootNode = { name: 'App.js', path: './repo/Fundrz-client/src/App.js' };  // Root node (start of the tree)
             drawTree(rootNode, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');
 
             ctx.restore();  // Restore the context after drawing
@@ -168,7 +168,7 @@ const generateHTML = (graph, start) => `
             redrawTree();
         });
 
-        // Mouse click event to toggle node visibility (only for children)
+        // Click event to toggle child visibility
         canvas.addEventListener('click', (event) => {
             const mouseX = (event.clientX - offsetX) / zoom;
             const mouseY = (event.clientY - offsetY) / zoom;
@@ -176,23 +176,23 @@ const generateHTML = (graph, start) => `
             // Check if any node is clicked
             const checkNodeClick = (node, x, y, parentPath) => {
                 if (isPointInRect(mouseX, mouseY, x, y, NODE_WIDTH, NODE_HEIGHT)) {
-                    // Toggle visibility of the clicked node's children
+                    // Toggle visibility of the clicked node's children (not the node itself)
                     const children = data[node.name] || [];
                     children.forEach(child => {
-                        const childNode = { name: child.import_name };
-                        // Only toggle visibility of children, not the clicked node itself
-                        nodeVisibility[childNode.name] = nodeVisibility[childNode.name] === false ? true : false;
+                        const childNode = { name: child.import_name, path: child.path };
+                        // Toggle the visibility of direct children
+                        nodeVisibility[childNode.name + childNode.path] = nodeVisibility[childNode.name + childNode.path] === false ? true : false;
                     });
 
                     redrawTree();
                     return true;  // Early exit if node is clicked
                 }
 
-                // Check children recursively
+                // Check children recursively (but don't toggle visibility for children here)
                 const children = data[node.name] || [];
                 let childX = x - (children.length - 1) * HORIZONTAL_SPACING / 2;
                 for (const child of children) {
-                    const childNode = { name: child.import_name };
+                    const childNode = { name: child.import_name, path: child.path };
                     const childY = y + VERTICAL_SPACING;
                     if (checkNodeClick(childNode, childX, childY, child.child)) {
                         return true;  // Stop further checking if child is clicked
@@ -203,11 +203,11 @@ const generateHTML = (graph, start) => `
                 return false;  // No node clicked
             };
 
-            checkNodeClick({ name: 'App.js' }, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');
+            // Start from the root node for the initial check
+            checkNodeClick({ name: 'App.js', path: './repo/Fundrz-client/src/App.js' }, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');
         });
     </script>
 </body>
 </html>
-
 `;
 exports.default = generateHTML;
