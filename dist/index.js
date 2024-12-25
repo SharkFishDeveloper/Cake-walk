@@ -96,15 +96,13 @@ function handleParsedDataAfterPrompt() {
         // return;
         //@ts-ignore
         let language = parsedData.codebase;
-        // if (
-        //   language === null ||
-        //   !language ||
-        //   !language[0] ||
-        //   startFiles == null ||
-        //   startFiles?.length === 0
-        // ) {
-        //   return console.log(redBright('Please fill properly in Deepdive.yml ...'));
-        // }
+        if (language === null ||
+            !language ||
+            !language[0] ||
+            startFiles == null ||
+            (startFiles === null || startFiles === void 0 ? void 0 : startFiles.length) === 0) {
+            return console.log((0, cli_color_1.redBright)('Please fill properly in Deepdive.yml ...'));
+        }
         let all_dependencies = [];
         //* < ------- >
         //* this function is just for reading the starting Files and all their dependencies
@@ -112,8 +110,12 @@ function handleParsedDataAfterPrompt() {
         //* < ------- >
         //@ts-ignore
         let proj_dependenciesdependencies = parsedData.exclude[0];
-        if (startFiles === null || startFiles.length === 0) {
+        // console.log(startFiles,tags,startFiles.length,startFiles[0])
+        if (!startFiles || startFiles.length === 0 || startFiles.some(file => file.trim() === '')) {
             return console.log((0, cli_color_1.redBright)('Please enter the start files in Deepdive.yml ...'));
+        }
+        if (!tags || tags.length === 0 || tags.some(file => file.trim() === '') || tags.length !== startFiles.length) {
+            return console.log((0, cli_color_1.redBright)('Please enter the start tags in Deepdive.yml ...'));
         }
         if (proj_dependenciesdependencies === null ||
             proj_dependenciesdependencies.length === 0) {

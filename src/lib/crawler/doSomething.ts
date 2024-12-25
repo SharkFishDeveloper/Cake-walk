@@ -22,18 +22,21 @@ export async function doSomething(
     case 'NextJs':
     case 'ReactJs':
       regex = jsRegex;
-
-  await readImports(startfileArray,tags ,finalAns);
+    for(let i = 0; i < startfileArray.length; i++){
+    // console.log("Start",startfileArray[i],tags[i]);
+    await readImports(startfileArray[i],tags[i],finalAns);
+    console.log("\n")
+  }
 }
 }
 
-export async function readImports(startfile: string[],tag:string[],finalAns: ImportsMap) {
+export async function readImports(startfile: string,tag:string,finalAns: ImportsMap) {
   try {
     await INITIAL_START_parseJsImports(
       regex,
       proj_dependencies,
-      startfile[0],
-      tag[0],
+      startfile,
+      tag,
       finalAns
     );
   } catch (error) {

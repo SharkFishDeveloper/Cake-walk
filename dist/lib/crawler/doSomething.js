@@ -28,7 +28,11 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns) {
             case 'NextJs':
             case 'ReactJs':
                 regex = javascript_1.default;
-                yield readImports(startfileArray, tags, finalAns);
+                for (let i = 0; i < startfileArray.length; i++) {
+                    // console.log("Start",startfileArray[i],tags[i]);
+                    yield readImports(startfileArray[i], tags[i], finalAns);
+                    console.log("\n");
+                }
         }
     });
 }
@@ -36,7 +40,7 @@ exports.doSomething = doSomething;
 function readImports(startfile, tag, finalAns) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile[0], tag[0], finalAns);
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile, tag, finalAns);
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));

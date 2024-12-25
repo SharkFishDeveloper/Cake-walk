@@ -99,15 +99,15 @@ async function handleParsedDataAfterPrompt() {
   //@ts-ignore
   let language: string | null = parsedData.codebase;
 
-  // if (
-  //   language === null ||
-  //   !language ||
-  //   !language[0] ||
-  //   startFiles == null ||
-  //   startFiles?.length === 0
-  // ) {
-  //   return console.log(redBright('Please fill properly in Deepdive.yml ...'));
-  // }
+  if (
+    language === null ||
+    !language ||
+    !language[0] ||
+    startFiles == null ||
+    startFiles?.length === 0
+  ) {
+    return console.log(redBright('Please fill properly in Deepdive.yml ...'));
+  }
 
   let all_dependencies: string[] = [];
 
@@ -118,12 +118,20 @@ async function handleParsedDataAfterPrompt() {
 
   //@ts-ignore
   let proj_dependenciesdependencies: string[] | null = parsedData.exclude[0];
-
-  if (startFiles === null || startFiles.length === 0) {
+  // console.log(startFiles,tags,startFiles.length,startFiles[0])
+  if (!startFiles || startFiles.length === 0 || startFiles.some(file => file.trim() === '')) {
     return console.log(
       redBright('Please enter the start files in Deepdive.yml ...')
     );
   }
+
+  if (!tags || tags.length === 0 || tags.some(file => file.trim() === '') || tags.length !== startFiles.length) {
+    return console.log(
+      redBright('Please enter the start tags in Deepdive.yml ...')
+    );
+  }
+
+
   if (
     proj_dependenciesdependencies === null ||
     proj_dependenciesdependencies.length === 0

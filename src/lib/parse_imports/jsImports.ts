@@ -1,11 +1,12 @@
-import { bgBlack, blue, cyan, green, magenta, white, yellow } from "cli-color";
+import { cyan, green, magenta, yellow } from "cli-color";
 import fs from "fs";
 import path from "path";
 import TsJsextensions from "../extensions/jstsExtensions";
 import JsImports from "../interfaces/JsTsimports";
 import { Edge, Graph } from "../interfaces/Graph";
 import { checkDependenciesInFile } from "../read_dependencies/read-dep-in-files";
-import { createHtmlFile } from "../open-live/createHtmlFile";
+
+
 
 
 
@@ -17,6 +18,7 @@ export async function INITIAL_START_parseJsImports(
   tag:string, // starting file name eg- App.js
   finalAns: ImportsMap
 ) {
+  let edges:Edge[] = [];
 
   let child_path_with_parent_path = path.join(process.cwd(), child_path);
 
@@ -25,6 +27,7 @@ export async function INITIAL_START_parseJsImports(
 
   await checkDependenciesInFile(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
   
+  // console.log(importsInAFile)
   const parent_full_path = path.join(process.cwd(), child_path);
 
 
@@ -38,8 +41,9 @@ export async function INITIAL_START_parseJsImports(
       for (const ext of TsJsextensions) {
         let temp_path = `${path_Child_Complete}${ext}`;
         extOfFile = ext;
-        if (fs.existsSync(path_Child_Complete)) {
+        if (fs.existsSync(temp_path)) {
           path_Child_Complete = temp_path;
+          // console.log(path_Child_Complete)
         }
       }
     }
@@ -55,11 +59,13 @@ export async function INITIAL_START_parseJsImports(
       child_path,
       parent_full_path,
       tag,
+      edges
     );
     // break;
   }
   // await createHtmlFile(graph,tag);
   const graph = createGraph(edges);
+  // console.log(graph)
   // const graph = {
   //   'App.js': [
   //     {
@@ -80,9 +86,9 @@ export async function INITIAL_START_parseJsImports(
   //       parent_path: './User/SignUP.jsx'
   //     }
   //   ]}
-  console.log(graph)
+  // console.log(graph)
 
-  console.log("Start")
+ 
   printDependencyTree(graph);
   // printHierarchy(edges);
   // console.log("graph",graph)
@@ -98,6 +104,7 @@ export async function parseJsImportsDFS(
   node_half_path: string,
   node_full_path: string,
   parent_name: string,
+  edges:Edge[]
 ) {
   let importsInAFile: JsImports[] = [];
   // console.log(parent_name,magenta("->"),childName,yellow("->"),node_half_path)
@@ -142,7 +149,8 @@ export async function parseJsImportsDFS(
           pathChild_withExtension,
           child_half_path,
           child_full_path,
-          childName
+          childName,
+          edges
         );
       }
     }
@@ -150,10 +158,7 @@ export async function parseJsImportsDFS(
 }
 
 
-
-let edges:Edge[] = [];
-
-const createGraph = (F: Edge[]): Graph => {
+const createGraph = (edges: Edge[]): Graph => {
   const graph: Graph = {}; 
 
   edges.forEach(({ parent, child, import_name,parent_path,child_full_path,parent_half_path }) => {
@@ -183,7 +188,7 @@ function printDependencyTree(graph) {
       const nodeParent = "   ".repeat(depth) + (isLast ? "  └── " : "  ├── ");
       const currentParentPath = parentPath || "";
       // Print the duplicate node with its import number from the first occurrence
-      console.log(`${"   ".repeat(depth)}${green(nodeParent)}${cyan(node)} ${yellow(`(${currentParentPath})`)} [Duplicate goto -> ${green(`(${nodeNumbers.get(node)})`)}]`);
+      console.log(`${"   ".repeat(depth)}${green(nodeParent)}${cyan(node)} ${yellow(`(${currentParentPath})`)} ${graph[node] ? `[Duplicate goto -> ${green(`(${nodeNumbers.get(node)})`)}]` : ""}`);
       return;
     }
 //└──→ " : "├──→ ");
@@ -205,10 +210,10 @@ function printDependencyTree(graph) {
       traverse(child.import_name, depth + 1, isChildLast, child.child);
     });
   }
-
   // Traverse all top-level keys in the graph
   for (const key in graph) {
     if (!printedNodes.has(key)) {
+      // console.log(graph[key][0], graph[key][0].parent_half_path,)
       traverse(key, 0, true, graph[key][0].parent_half_path);
     }
   }
