@@ -27,9 +27,6 @@ export async function INITIAL_START_parseJsImports(
   
   const parent_full_path = path.join(process.cwd(), child_path);
 
-  // adapt this for multiple starting files
-  // edges.push({parent:"Start",child: child_path,import_name:"Start",parent_path:"Start"})
-
 
   for (let i = 0; i < importsInAFile.length; i++) {
     const imp = importsInAFile[i];
@@ -62,14 +59,17 @@ export async function INITIAL_START_parseJsImports(
     break;
   }
   const graph = createGraph(edges);
-  // let edgesA: Edge[] = [
-  //   { parent: 'a', child: 'b', import_name: 'edge1' },
-  //   { parent: 'b', child: 'c', import_name: 'edge2' },
-  //   { parent: 'c', child: 'd', import_name: 'edge3' },
-  //   { parent: 'd', child: 'e', import_name: 'edge4' },
-  //   { parent: 'a', child: 'f', import_name: 'edge5' }
-  // ];
-  await createHtmlFile(graph,"App.js");
+  // const edgesTemp ={
+  //   'App.js': [
+  //   {
+  //     child: './User/SignUP.jsx',
+  //     import_name: 'SignUp',
+  //     parent_path: './repo/Fundrz-client/src/App.js'
+  //   }
+  // ]
+  // }
+  // const graphA = createGraph(graph);
+  await createHtmlFile(graph,tag);
   console.log("graph",graph)
 }
 

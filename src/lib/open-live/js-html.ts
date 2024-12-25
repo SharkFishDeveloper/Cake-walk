@@ -1,5 +1,4 @@
 import { Graph } from "../interfaces/Graph";
-import jsHtml from "./js-html";
 
 const generateHTML = (graph: Graph, start: string): string => `
 <!DOCTYPE html>
@@ -12,16 +11,19 @@ const generateHTML = (graph: Graph, start: string): string => `
         body {
             margin: 0;
             padding: 0;
+            background-color: black;  /* Set the entire body background to black */
+            color: white;
         }
         canvas {
-            border: 1px solid #ccc;
+            background-color: black;  /* Ensure the canvas background is black */
             display: block;
             margin: 0 auto;
+            border: 1px solid white;  /* Set the canvas border to white */
         }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">File Dependency Tree on Canvas</h1>
+    <h1 style="text-align: center; color: white;">File Dependency Tree on Canvas</h1>
     <canvas id="treeCanvas" width="800" height="600"></canvas>
     <script>
         const data = ${JSON.stringify(graph)};
@@ -36,9 +38,13 @@ const generateHTML = (graph: Graph, start: string): string => `
 
         // Helper function to draw the nodes and connections
         function drawTree(node, x, y, parentPath, level = 0) {
-            // Draw the current node
-            ctx.fillStyle = '#3182bd';
-            ctx.fillRect(x, y, NODE_WIDTH, NODE_HEIGHT);
+            // Draw the current node (with only borders and no fill)
+            ctx.fillStyle = 'transparent';
+            ctx.strokeStyle = '#fff';  // Set the border color to white
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, NODE_WIDTH, NODE_HEIGHT);
+            
+            // Draw the text inside the node
             ctx.fillStyle = '#fff';
             ctx.font = '14px Arial';
             ctx.textAlign = 'center';
@@ -46,7 +52,7 @@ const generateHTML = (graph: Graph, start: string): string => `
             ctx.fillText(node.name, x + NODE_WIDTH / 2, y + NODE_HEIGHT / 2);
 
             // Draw the parent path text next to the node
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = '#fff'; // White text
             ctx.font = '12px Arial';
             ctx.textAlign = 'left';
             ctx.fillText(parentPath, x + NODE_WIDTH + 10, y + NODE_HEIGHT / 2);
@@ -63,7 +69,7 @@ const generateHTML = (graph: Graph, start: string): string => `
                 ctx.beginPath();
                 ctx.moveTo(x + NODE_WIDTH / 2, y + NODE_HEIGHT);
                 ctx.lineTo(childX + NODE_WIDTH / 2, childY);
-                ctx.strokeStyle = '#ccc';
+                ctx.strokeStyle = '#fff'; // White lines for connections
                 ctx.stroke();
                 
                 // Recursively draw the child
@@ -79,7 +85,6 @@ const generateHTML = (graph: Graph, start: string): string => `
     </script>
 </body>
 </html>
-
 `;
 
 export default generateHTML;
