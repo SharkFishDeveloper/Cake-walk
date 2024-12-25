@@ -23,7 +23,7 @@ const generateHTML = (graph: Graph, start: string): string => `
 <body>
     <canvas id="treeCanvas"></canvas>
     <script>
-        const data = ${JSON.stringify(graph)};
+        const data = ${JSON.stringify(graph)}; // graph data
         const canvas = document.getElementById('treeCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -33,13 +33,14 @@ const generateHTML = (graph: Graph, start: string): string => `
         const VERTICAL_SPACING = 120;
         const PARENT_PATH_OFFSET = 200;  // Distance between the node and the parent path text
 
-        // Variables for dragging and zooming
+        // Variables for dragging, zooming, and node visibility
         let isDragging = false;
         let lastX = 0;
         let lastY = 0;
         let offsetX = 0;
         let offsetY = 0;
         let zoom = 1; // Zoom level (1 is the default)
+        const nodeVisibility = {}; // To track visibility of nodes
 
         // Resize the canvas to fill the entire screen
         function resizeCanvas() {
@@ -49,11 +50,15 @@ const generateHTML = (graph: Graph, start: string): string => `
 
         // Helper function to draw the nodes and connections
         function drawTree(node, x, y, parentPath, level = 0) {
-            // Draw the current node
+            // Draw the current node if it is visible
+            if (nodeVisibility[node.name] === false) {
+                return;
+            }
+
             ctx.fillStyle = '#3182bd';
             ctx.fillRect(x, y, NODE_WIDTH, NODE_HEIGHT);
             ctx.fillStyle = '#fff';
-            ctx.font = \`14px Arial\`;
+            ctx.font = '14px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(node.name, x + NODE_WIDTH / 2, y + NODE_HEIGHT / 2);
@@ -64,7 +69,7 @@ const generateHTML = (graph: Graph, start: string): string => `
             ctx.textAlign = 'left';
             ctx.fillText(parentPath, x + NODE_WIDTH + 10, y + NODE_HEIGHT / 2);
 
-            // Draw children and connect them with lines
+            // Draw children and connect them with lines if visible
             const children = data[node.name] || [];
             let childX = x - (children.length - 1) * HORIZONTAL_SPACING / 2;
 
@@ -72,15 +77,19 @@ const generateHTML = (graph: Graph, start: string): string => `
                 const childNode = { name: child.import_name };
                 const childY = y + VERTICAL_SPACING;
 
-                // Draw a line from parent to child
-                ctx.beginPath();
-                ctx.moveTo(x + NODE_WIDTH / 2, y + NODE_HEIGHT);
-                ctx.lineTo(childX + NODE_WIDTH / 2, childY);
-                ctx.strokeStyle = '#ccc';
-                ctx.stroke();
+                // Only draw children if they are visible
+                if (nodeVisibility[childNode.name] !== false) {
+                    // Draw a line from parent to child
+                    ctx.beginPath();
+                    ctx.moveTo(x + NODE_WIDTH / 2, y + NODE_HEIGHT);
+                    ctx.lineTo(childX + NODE_WIDTH / 2, childY);
+                    ctx.strokeStyle = '#ccc';
+                    ctx.stroke();
 
-                // Recursively draw the child
-                drawTree(childNode, childX, childY, child.child, level + 1);
+                    // Recursively draw the child
+                    drawTree(childNode, childX, childY, child.child, level + 1);
+                }
+
                 childX += HORIZONTAL_SPACING;  // Move the child X position
             });
         }
@@ -98,6 +107,11 @@ const generateHTML = (graph: Graph, start: string): string => `
             drawTree(rootNode, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');
 
             ctx.restore();  // Restore the context after drawing
+        }
+
+        // Check if a point (x, y) is inside a rectangle (node)
+        function isPointInRect(x, y, rectX, rectY, width, height) {
+            return x >= rectX && x <= rectX + width && y >= rectY && y <= rectY + height;
         }
 
         // Initial resize and draw
@@ -153,9 +167,48 @@ const generateHTML = (graph: Graph, start: string): string => `
             }
             redrawTree();
         });
+
+        // Mouse click event to toggle node visibility (only for children)
+        canvas.addEventListener('click', (event) => {
+            const mouseX = (event.clientX - offsetX) / zoom;
+            const mouseY = (event.clientY - offsetY) / zoom;
+
+            // Check if any node is clicked
+            const checkNodeClick = (node, x, y, parentPath) => {
+                if (isPointInRect(mouseX, mouseY, x, y, NODE_WIDTH, NODE_HEIGHT)) {
+                    // Toggle visibility of the clicked node's children
+                    const children = data[node.name] || [];
+                    children.forEach(child => {
+                        const childNode = { name: child.import_name };
+                        // Only toggle visibility of children, not the clicked node itself
+                        nodeVisibility[childNode.name] = nodeVisibility[childNode.name] === false ? true : false;
+                    });
+
+                    redrawTree();
+                    return true;  // Early exit if node is clicked
+                }
+
+                // Check children recursively
+                const children = data[node.name] || [];
+                let childX = x - (children.length - 1) * HORIZONTAL_SPACING / 2;
+                for (const child of children) {
+                    const childNode = { name: child.import_name };
+                    const childY = y + VERTICAL_SPACING;
+                    if (checkNodeClick(childNode, childX, childY, child.child)) {
+                        return true;  // Stop further checking if child is clicked
+                    }
+                    childX += HORIZONTAL_SPACING;  // Move the child X position
+                }
+
+                return false;  // No node clicked
+            };
+
+            checkNodeClick({ name: 'App.js' }, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');
+        });
     </script>
 </body>
 </html>
+
 `;
 
 export default generateHTML;
