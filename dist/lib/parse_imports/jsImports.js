@@ -41,7 +41,7 @@ finalAns) {
                 }
             }
             yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag);
-            break;
+            // break;
         }
         const graph = createGraph(edges);
         // const edgesTemp ={

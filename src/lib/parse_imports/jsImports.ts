@@ -56,7 +56,7 @@ export async function INITIAL_START_parseJsImports(
       parent_full_path,
       tag,
     );
-    break;
+    // break;
   }
   const graph = createGraph(edges);
   // const edgesTemp ={
