@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseJsImportsDFS = exports.INITIAL_START_parseJsImports = void 0;
+const cli_color_1 = require("cli-color");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
@@ -129,18 +130,19 @@ function printDependencyTree(graph) {
     function traverse(node, depth = 0, isLast = true, parentPath = "") {
         // Check if node has already been printed (duplicate case)
         if (printedNodes.has(node)) {
-            const nodeParent = "   ".repeat(depth) + (isLast ? "└──→ " : "├──→ ");
+            const nodeParent = "   ".repeat(depth) + (isLast ? "  └── " : "  ├── ");
             const currentParentPath = parentPath || "";
             // Print the duplicate node with its import number from the first occurrence
-            console.log(`${"   ".repeat(depth)}${nodeParent}${node} (import: ${currentParentPath}) [Duplicate goto -> ${nodeNumbers.get(node)}]`);
+            console.log(`${"   ".repeat(depth)}${(0, cli_color_1.green)(nodeParent)}${(0, cli_color_1.cyan)(node)} ${(0, cli_color_1.yellow)(`(${currentParentPath})`)} [Duplicate goto -> ${(0, cli_color_1.green)(`(${nodeNumbers.get(node)})`)}]`);
             return;
         }
-        // Create prefix for the node
-        const prefix = "   ".repeat(depth) + (isLast ? "└──→ " : "├──→ ");
+        //└──→ " : "├──→ ");
+        // Create prefix for the node 
+        const prefix = "   ".repeat(depth) + (isLast ? "  └── " : "  ├── ");
         const children = graph[node] || [];
         // Determine the parent import path
         const currentParentPath = parentPath || ""; // Default to empty for top node
-        console.log(`${"   ".repeat(depth)}${prefix}${node} (import: ${currentParentPath}) ${counter++}`);
+        console.log(`${"   ".repeat(depth)}${(0, cli_color_1.green)(prefix)}${(0, cli_color_1.cyan)(node)} ${(0, cli_color_1.yellow)(`(${currentParentPath})`)} ${(0, cli_color_1.magenta)(`(${counter++})`)}`);
         // Mark this node as printed and store the import number for duplicates
         printedNodes.add(node);
         nodeNumbers.set(node, counter - 1); // Store the import number of the first occurrence

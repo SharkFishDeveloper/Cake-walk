@@ -1,4 +1,4 @@
-import { bgBlack, blue, green, magenta, white, yellow } from "cli-color";
+import { bgBlack, blue, cyan, green, magenta, white, yellow } from "cli-color";
 import fs from "fs";
 import path from "path";
 import TsJsextensions from "../extensions/jstsExtensions";
@@ -171,6 +171,7 @@ const createGraph = (F: Edge[]): Graph => {
 };
 
 
+
 function printDependencyTree(graph) {
   const printedNodes = new Set();  // Track printed nodes to avoid repetition
   const nodeNumbers = new Map();  // Map to store the first occurrence import number of each node
@@ -178,21 +179,21 @@ function printDependencyTree(graph) {
 
   function traverse(node, depth = 0, isLast = true, parentPath = "") {
     // Check if node has already been printed (duplicate case)
-    if (printedNodes.has(node)) {
-      const nodeParent = "   ".repeat(depth) + (isLast ? "└──→ " : "├──→ ");
+    if (printedNodes.has(node)) {                         
+      const nodeParent = "   ".repeat(depth) + (isLast ? "  └── " : "  ├── ");
       const currentParentPath = parentPath || "";
       // Print the duplicate node with its import number from the first occurrence
-      console.log(`${"   ".repeat(depth)}${nodeParent}${node} (import: ${currentParentPath}) [Duplicate goto -> ${nodeNumbers.get(node)}]`);
+      console.log(`${"   ".repeat(depth)}${green(nodeParent)}${cyan(node)} ${yellow(`(${currentParentPath})`)} [Duplicate goto -> ${green(`(${nodeNumbers.get(node)})`)}]`);
       return;
     }
-
-    // Create prefix for the node
-    const prefix = "   ".repeat(depth) + (isLast ? "└──→ " : "├──→ ");
+//└──→ " : "├──→ ");
+    // Create prefix for the node 
+    const prefix = "   ".repeat(depth) + (isLast ? "  └── " : "  ├── ");
     const children = graph[node] || [];
 
     // Determine the parent import path
     const currentParentPath = parentPath || ""; // Default to empty for top node
-    console.log(`${"   ".repeat(depth)}${prefix}${node} (import: ${currentParentPath}) ${counter++}`);
+    console.log(`${"   ".repeat(depth)}${green(prefix)}${cyan(node)} ${yellow(`(${currentParentPath})`)} ${magenta(`(${counter++})`)}`);
 
     // Mark this node as printed and store the import number for duplicates
     printedNodes.add(node);
@@ -212,6 +213,3 @@ function printDependencyTree(graph) {
     }
   }
 }
-
-
-
