@@ -48,9 +48,6 @@ const generateHTML = (graph, start) => `
 
         // Helper function to draw the nodes and connections
         function drawTree(node, x, y, parentPath, level = 0) {
-            x = x + offsetX;
-            y = y + offsetY;
-
             // Draw the current node
             ctx.fillStyle = '#3182bd';
             ctx.fillRect(x, y, NODE_WIDTH, NODE_HEIGHT);
@@ -87,11 +84,12 @@ const generateHTML = (graph, start) => `
             });
         }
 
-        // Redraw the tree
+        // Redraw the tree with the current offset applied globally
         function redrawTree() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
             const rootNode = { name: 'App.js' };  // Root node (start of the tree)
-            drawTree(rootNode, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');  // Center the root node
+            // Apply the offset to the whole tree, not just relative nodes
+            drawTree(rootNode, canvas.width / 2 - NODE_WIDTH / 2 + offsetX, 20 + offsetY, './repo/Fundrz-client/src/App.js');  // Center the root node
         }
 
         // Initial resize and draw
