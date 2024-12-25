@@ -56,7 +56,7 @@ export async function INITIAL_START_parseJsImports(
       parent_full_path,
       tag,
     );
-    break;
+    // break;
   }
   // await createHtmlFile(graph,tag);
   const graph = createGraph(edges);
@@ -82,6 +82,7 @@ export async function INITIAL_START_parseJsImports(
   //   ]}
   console.log(graph)
 
+  console.log("Start")
   printDependencyTree(graph);
   // printHierarchy(edges);
   // console.log("graph",graph)
@@ -100,7 +101,9 @@ export async function parseJsImportsDFS(
 ) {
   let importsInAFile: JsImports[] = [];
   // console.log(parent_name,magenta("->"),childName,yellow("->"),node_half_path)
-  edges.push({parent:parent_name,child:child_half_path,import_name:childName,parent_path:node_half_path})
+  edges.push({parent:parent_name,child:child_half_path,import_name:childName,parent_path:node_full_path,
+    child_full_path:child_full_path,parent_half_path:node_half_path
+  })
 
   // console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name),))
 
@@ -148,63 +151,67 @@ export async function parseJsImportsDFS(
 
 
 
-
-
-
-
-
-function printDependencyTree(graph) {
-  const printedNodes = new Set();
-
-  function traverse(node, depth = 0, isLast = true) {
-    const prefix = "   ".repeat(depth) + (isLast ? "   └──→ " : "   ├──→ ");
-
-    // Get children and their paths
-    const children = graph[node] || [];
-    const parentPath = children[0]?.parent_path || "root";
-
-    // Print the current node
-    console.log(`${"   ".repeat(depth - 1)}${depth > 0 ? prefix : ""}${node} (import: ${parentPath})`);
-
-    // Mark this node as printed
-    printedNodes.add(node);
-
-    // Recursively print children
-    children.forEach((child, index) => {
-      const isChildLast = index === children.length - 1;
-      if (!printedNodes.has(child.import_name)) {
-        traverse(child.import_name, depth + 1, isChildLast);
-      }
-    });
-  }
-
-  // Traverse all top-level keys in the graph
-  for (const key in graph) {
-    if (!printedNodes.has(key)) {
-      console.log(`${key} (import: ${graph[key][0].parent_path || "root"})`);
-      traverse(key, 1, true);
-    }
-  }
-}
-
-
-
 let edges:Edge[] = [];
 
 const createGraph = (F: Edge[]): Graph => {
   const graph: Graph = {}; 
 
-  edges.forEach(({ parent, child, import_name,parent_path }) => {
+  edges.forEach(({ parent, child, import_name,parent_path,child_full_path,parent_half_path }) => {
     if (!graph[parent]) {
       graph[parent] = [];
     }
 
     const childExists = graph[parent].some(entry => entry.child === child);
     if (!childExists) {
-      graph[parent].push({ child, import_name,parent_path });
+      graph[parent].push({ child, import_name,parent_path,child_full_path,parent_half_path });
     }
   });
 
   return graph;
 };
+
+
+function printDependencyTree(graph) {
+  const printedNodes = new Set();  // Track printed nodes to avoid repetition
+  const nodeNumbers = new Map();  // Map to store the first occurrence import number of each node
+  let counter = 1;  // Initialize counter to start numbering
+
+  function traverse(node, depth = 0, isLast = true, parentPath = "") {
+    // Check if node has already been printed (duplicate case)
+    if (printedNodes.has(node)) {
+      const nodeParent = "   ".repeat(depth) + (isLast ? "└──→ " : "├──→ ");
+      const currentParentPath = parentPath || "";
+      // Print the duplicate node with its import number from the first occurrence
+      console.log(`${"   ".repeat(depth)}${nodeParent}${node} (import: ${currentParentPath}) [Duplicate goto -> ${nodeNumbers.get(node)}]`);
+      return;
+    }
+
+    // Create prefix for the node
+    const prefix = "   ".repeat(depth) + (isLast ? "└──→ " : "├──→ ");
+    const children = graph[node] || [];
+
+    // Determine the parent import path
+    const currentParentPath = parentPath || ""; // Default to empty for top node
+    console.log(`${"   ".repeat(depth)}${prefix}${node} (import: ${currentParentPath}) ${counter++}`);
+
+    // Mark this node as printed and store the import number for duplicates
+    printedNodes.add(node);
+    nodeNumbers.set(node, counter - 1); // Store the import number of the first occurrence
+
+    // Recursively print children
+    children.forEach((child, index) => {
+      const isChildLast = index === children.length - 1;
+      traverse(child.import_name, depth + 1, isChildLast, child.child);
+    });
+  }
+
+  // Traverse all top-level keys in the graph
+  for (const key in graph) {
+    if (!printedNodes.has(key)) {
+      traverse(key, 0, true, graph[key][0].parent_half_path);
+    }
+  }
+}
+
+
 
