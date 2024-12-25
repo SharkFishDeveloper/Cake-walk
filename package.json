@@ -1,10 +1,10 @@
 {
-  "name": "deepdive-cli",
-  "version": "1.0.3",
+  "name": "barrenland",
+  "version": "1.0.9",
   "description": "A tool to explore large codebases",
   "main": "./dist/index.js",
   "bin": {
-    "deepdive-cli": "./dist/index.js"
+    "barrenland": "./dist/index.js"
   },
   "scripts": {
     "dev": "cls && tsc && node ./dist/index.js",

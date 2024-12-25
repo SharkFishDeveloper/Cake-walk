@@ -12,6 +12,15 @@ const questions = [
       'Rust',
     ],
   },
+  {
+  type: 'list',
+  name: 'ansFormat',
+  message: 'Do you want to see full dependencies or half ?',
+  choices: [
+    'full',
+    'half',
+  ],
+},
  {
   type: 'input',
   name: 'startPoint',
@@ -23,7 +32,7 @@ const questions = [
   name: 'startPointTag',
   message: 'What is the tag of your starting file ?',
   default: '', 
-}
+},
 ];
-
+// ./repo/Fundrz-client/src/App.js
 export default questions;

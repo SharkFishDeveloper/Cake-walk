@@ -39,6 +39,7 @@ function start() {
                         },
                     ],
                     exclude: [dependencies],
+                    dependencies: prompt_answer.ansFormat
                 };
                 let yamlString = js_yaml_1.default.dump(ymlData, {
                     indent: 8,
@@ -96,6 +97,11 @@ function handleParsedDataAfterPrompt() {
         // return;
         //@ts-ignore
         let language = parsedData.codebase;
+        //@ts-ignore
+        let howToSeeDependencies = parsedData.dependencies;
+        if (!howToSeeDependencies || howToSeeDependencies === null) {
+            return console.log((0, cli_color_1.redBright)('Please fill how to see dependencies in Deepdive.yml ...'));
+        }
         if (language === null ||
             !language ||
             !language[0] ||
@@ -122,7 +128,7 @@ function handleParsedDataAfterPrompt() {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
         let finalAns = {};
-        yield (0, doSomething_1.doSomething)(startFiles, tags, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns);
+        yield (0, doSomething_1.doSomething)(startFiles, tags, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns, howToSeeDependencies);
     });
 }
 start();

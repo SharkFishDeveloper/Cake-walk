@@ -29,6 +29,7 @@ async function start() {
           },
         ],
         exclude: [dependencies],
+        dependencies:prompt_answer.ansFormat
       };
 
       let yamlString = yaml.dump(ymlData, {
@@ -98,6 +99,11 @@ async function handleParsedDataAfterPrompt() {
   // return;
   //@ts-ignore
   let language: string | null = parsedData.codebase;
+   //@ts-ignore
+  let howToSeeDependencies: string | null = parsedData.dependencies;
+  if (!howToSeeDependencies || howToSeeDependencies === null) {
+    return console.log(redBright('Please fill how to see dependencies in Deepdive.yml ...'));
+  }
 
   if (
     language === null ||
@@ -147,7 +153,8 @@ async function handleParsedDataAfterPrompt() {
     tags,
     language as string,
     all_dependencies ?? [],
-    finalAns
+    finalAns,
+    howToSeeDependencies
   );
 }
 

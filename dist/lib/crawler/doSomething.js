@@ -16,9 +16,10 @@ exports.readImports = exports.doSomething = void 0;
 const javascript_1 = __importDefault(require("../regex/javascript"));
 const jsImports_1 = require("../parse_imports/jsImports");
 const cli_color_1 = require("cli-color");
+// import { createSpinner} from 'nanospinner';
 let regex;
 let proj_dependencies;
-function doSomething(startfileArray, tags, language, dependencies, finalAns) {
+function doSomething(startfileArray, tags, language, dependencies, finalAns, howToSeeDependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         proj_dependencies = dependencies;
         //* add multiple switch statements for importing a particular language's REGEX
@@ -28,19 +29,27 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns) {
             case 'NextJs':
             case 'ReactJs':
                 regex = javascript_1.default;
-                for (let i = 0; i < startfileArray.length; i++) {
-                    // console.log("Start",startfileArray[i],tags[i]);
-                    yield readImports(startfileArray[i], tags[i], finalAns);
-                    console.log("\n");
+                // const spinner = createSpinner().start();
+                try {
+                    for (let i = 0; i < startfileArray.length; i++) {
+                        console.log((0, cli_color_1.blueBright)("Processed file:--> ", tags[i], "\n"));
+                        console.log("Start");
+                        yield readImports(startfileArray[i], tags[i], finalAns, howToSeeDependencies);
+                    }
+                    console.log((0, cli_color_1.greenBright)("<--Finished-->"));
+                }
+                catch (error) {
+                    console.error('An error occurred during file processing.');
+                    console.error(error);
                 }
         }
     });
 }
 exports.doSomething = doSomething;
-function readImports(startfile, tag, finalAns) {
+function readImports(startfile, tag, finalAns, howToSeeDependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile, tag, finalAns);
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile, tag, finalAns, howToSeeDependencies);
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));

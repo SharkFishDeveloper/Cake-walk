@@ -16,7 +16,8 @@ export async function INITIAL_START_parseJsImports(
   proj_dependencies: string[],
   child_path: string, // starting file location eg- src/pages/App.js
   tag:string, // starting file name eg- App.js
-  finalAns: ImportsMap
+  finalAns: ImportsMap,       
+  howToSeeDependencies: string
 ) {
   let edges:Edge[] = [];
 
@@ -43,24 +44,27 @@ export async function INITIAL_START_parseJsImports(
         extOfFile = ext;
         if (fs.existsSync(temp_path)) {
           path_Child_Complete = temp_path;
+          break;
           // console.log(path_Child_Complete)
         }
       }
     }
 
 
-    await parseJsImportsDFS(
-      regex, 
-      proj_dependencies, 
-      finalAns,
-      imp.imported,
-      child_half_path,
-      path_Child_Complete,
-      child_path,
-      parent_full_path,
-      tag,
-      edges
-    );
+    if (fs.existsSync(path_Child_Complete)) {
+      await parseJsImportsDFS(
+        regex, 
+        proj_dependencies, 
+        finalAns,
+        imp.imported,
+        child_half_path,
+        path_Child_Complete,
+        child_path,
+        parent_full_path,
+        tag,
+        edges,
+      );
+    }
     // break;
   }
   // await createHtmlFile(graph,tag);
@@ -89,7 +93,7 @@ export async function INITIAL_START_parseJsImports(
   // console.log(graph)
 
  
-  printDependencyTree(graph);
+  printDependencyTree(graph,howToSeeDependencies);
   // printHierarchy(edges);
   // console.log("graph",graph)
 }
@@ -104,7 +108,7 @@ export async function parseJsImportsDFS(
   node_half_path: string,
   node_full_path: string,
   parent_name: string,
-  edges:Edge[]
+  edges:Edge[],
 ) {
   let importsInAFile: JsImports[] = [];
   // console.log(parent_name,magenta("->"),childName,yellow("->"),node_half_path)
@@ -150,7 +154,7 @@ export async function parseJsImportsDFS(
           child_half_path,
           child_full_path,
           childName,
-          edges
+          edges,
         );
       }
     }
@@ -177,7 +181,7 @@ const createGraph = (edges: Edge[]): Graph => {
 
 
 
-function printDependencyTree(graph) {
+function printDependencyTree(graph,howToSeeDependencies:string) {
   const printedNodes = new Set();  // Track printed nodes to avoid repetition
   const nodeNumbers = new Map();  // Map to store the first occurrence import number of each node
   let counter = 1;  // Initialize counter to start numbering
@@ -185,7 +189,7 @@ function printDependencyTree(graph) {
   function traverse(node, depth = 0, isLast = true, parentPath = "") {
     // Check if node has already been printed (duplicate case)
     if (printedNodes.has(node)) {                         
-      const nodeParent = "   ".repeat(depth) + (isLast ? "  └── " : "  ├── ");
+      const nodeParent = "   ".repeat(depth) + (isLast ? "    └── " : "    ├── ");
       const currentParentPath = parentPath || "";
       // Print the duplicate node with its import number from the first occurrence
       console.log(`${"   ".repeat(depth)}${green(nodeParent)}${cyan(node)} ${yellow(`(${currentParentPath})`)} ${graph[node] ? `[Duplicate goto -> ${green(`(${nodeNumbers.get(node)})`)}]` : ""}`);
@@ -193,7 +197,7 @@ function printDependencyTree(graph) {
     }
 //└──→ " : "├──→ ");
     // Create prefix for the node 
-    const prefix = "   ".repeat(depth) + (isLast ? "  └── " : "  ├── ");
+    const prefix = "   ".repeat(depth) + (isLast ? "    └── " : "    ├── ");
     const children = graph[node] || [];
 
     // Determine the parent import path
@@ -207,14 +211,14 @@ function printDependencyTree(graph) {
     // Recursively print children
     children.forEach((child, index) => {
       const isChildLast = index === children.length - 1;
-      traverse(child.import_name, depth + 1, isChildLast, child.child);
+      traverse(child.import_name, depth + 1, isChildLast, howToSeeDependencies==="half" ? child.child : child.child_full_path);
     });
   }
   // Traverse all top-level keys in the graph
   for (const key in graph) {
     if (!printedNodes.has(key)) {
       // console.log(graph[key][0], graph[key][0].parent_half_path,)
-      traverse(key, 0, true, graph[key][0].parent_half_path);
+      traverse(key, 0, true, howToSeeDependencies==="half" ? graph[key][0].parent_half_path : graph[key][0].parent_path );
     }
   }
 }
