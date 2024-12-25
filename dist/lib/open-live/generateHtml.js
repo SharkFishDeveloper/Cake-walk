@@ -11,17 +11,17 @@ const generateHTML = (graph, start) => `
         body {
             margin: 0;
             padding: 0;
+            background-color: black;
+            overflow: hidden;  /* Prevent scrollbars */
         }
         canvas {
-            border: 1px solid #ccc;
             display: block;
-            margin: 0 auto;
+            cursor: grab;
         }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">File Dependency Tree on Canvas</h1>
-    <canvas id="treeCanvas" width="800" height="600"></canvas>
+    <canvas id="treeCanvas"></canvas>
     <script>
         const data = ${JSON.stringify(graph)};
         const canvas = document.getElementById('treeCanvas');
@@ -29,12 +29,28 @@ const generateHTML = (graph, start) => `
 
         const NODE_WIDTH = 120;
         const NODE_HEIGHT = 40;
-        const HORIZONTAL_SPACING = 200;
+        const HORIZONTAL_SPACING = 300;
         const VERTICAL_SPACING = 80;
-        const PARENT_PATH_OFFSET = 150;  // Distance between the node and the parent path text
+        const PARENT_PATH_OFFSET = 200;  // Distance between the node and the parent path text
+
+        // Variables for dragging
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Resize the canvas to fill the entire screen
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
 
         // Helper function to draw the nodes and connections
         function drawTree(node, x, y, parentPath, level = 0) {
+            x = x + offsetX;
+            y = y + offsetY;
+
             // Draw the current node
             ctx.fillStyle = '#3182bd';
             ctx.fillRect(x, y, NODE_WIDTH, NODE_HEIGHT);
@@ -45,7 +61,7 @@ const generateHTML = (graph, start) => `
             ctx.fillText(node.name, x + NODE_WIDTH / 2, y + NODE_HEIGHT / 2);
 
             // Draw the parent path text next to the node
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = '#fff';
             ctx.font = '12px Arial';
             ctx.textAlign = 'left';
             ctx.fillText(parentPath, x + NODE_WIDTH + 10, y + NODE_HEIGHT / 2);
@@ -71,13 +87,57 @@ const generateHTML = (graph, start) => `
             });
         }
 
-        // Start drawing the tree from the "root" node
-        ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
-        const rootNode = { name: 'App.js' };  // Root node (start of the tree)
-        drawTree(rootNode, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');  // Center the root node
+        // Redraw the tree
+        function redrawTree() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
+            const rootNode = { name: 'App.js' };  // Root node (start of the tree)
+            drawTree(rootNode, canvas.width / 2 - NODE_WIDTH / 2, 20, './repo/Fundrz-client/src/App.js');  // Center the root node
+        }
+
+        // Initial resize and draw
+        resizeCanvas();
+        redrawTree();
+
+        // Window resize event to adjust canvas size dynamically
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            redrawTree();
+        });
+
+        // Mouse down event for dragging
+        canvas.addEventListener('mousedown', (event) => {
+            isDragging = true;
+            lastX = event.clientX;
+            lastY = event.clientY;
+            canvas.style.cursor = 'grabbing';
+        });
+
+        // Mouse move event for dragging
+        canvas.addEventListener('mousemove', (event) => {
+            if (isDragging) {
+                const dx = event.clientX - lastX;
+                const dy = event.clientY - lastY;
+                offsetX += dx;
+                offsetY += dy;
+                lastX = event.clientX;
+                lastY = event.clientY;
+                redrawTree();
+            }
+        });
+
+        // Mouse up event to stop dragging
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        // Mouse leave event to stop dragging if mouse leaves the canvas
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
     </script>
 </body>
 </html>
-
 `;
 exports.default = generateHTML;
