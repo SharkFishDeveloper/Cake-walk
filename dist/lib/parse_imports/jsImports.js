@@ -42,27 +42,39 @@ finalAns) {
             yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag);
             break;
         }
-        const graph = createGraph(edges);
-        // const edgesTemp ={
-        //   'App.js': [
-        //   {
-        //     child: './User/SignUP.jsx',
-        //     import_name: 'SignUp',
-        //     parent_path: './repo/Fundrz-client/src/App.js'
-        //   }
-        // ]
-        // }
-        // const graphA = createGraph(graph);
         // await createHtmlFile(graph,tag);
-        console.log("graph", graph);
-        logGraph(graph);
+        const graph = createGraph(edges);
+        // const graph = {
+        //   'App.js': [
+        //     {
+        //       child: './User/SignUP.jsx',
+        //       import_name: 'SignUp',
+        //       parent_path: './repo/Fundrz-client/src/App.js'
+        //     }
+        //   ],
+        //   SignUp: [
+        //     {
+        //       child: '../UserContx/UserContext.js',
+        //       import_name: 'UserContext',
+        //       parent_path: './User/SignUP.jsx'
+        //     },
+        //     {
+        //       child: '../IP.js',
+        //       import_name: 'deployedIp',
+        //       parent_path: './User/SignUP.jsx'
+        //     }
+        //   ]}
+        console.log(graph);
+        printDependencyTree(graph);
+        // printHierarchy(edges);
+        // console.log("graph",graph)
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
 function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_half_path, child_full_path, node_half_path, node_full_path, parent_name) {
     return __awaiter(this, void 0, void 0, function* () {
         let importsInAFile = [];
-        // console.log(node_half_path,magenta("->"),parent_name,yellow("->"),child_half_path,childName)
+        // console.log(parent_name,magenta("->"),childName,yellow("->"),node_half_path)
         edges.push({ parent: parent_name, child: child_half_path, import_name: childName, parent_path: node_half_path });
         // console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name),))
         yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_full_path);
@@ -93,31 +105,31 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
     });
 }
 exports.parseJsImportsDFS = parseJsImportsDFS;
-function logGraph(graph) {
-    const visited = new Set(); // To track the nodes we've already printed
-    function printNode(node, indent = "", isLast = true) {
-        if (visited.has(node))
-            return; // Skip if the node was already printed
-        visited.add(node); // Mark the current node as visited after printing
+function printDependencyTree(graph) {
+    const printedNodes = new Set();
+    function traverse(node, depth = 0, isLast = true) {
+        var _a;
+        const prefix = "   ".repeat(depth) + (isLast ? "   └──→ " : "   ├──→ ");
+        // Get children and their paths
+        const children = graph[node] || [];
+        const parentPath = ((_a = children[0]) === null || _a === void 0 ? void 0 : _a.parent_path) || "root";
         // Print the current node
-        console.log(`${indent}${node}`);
-        if (graph[node]) {
-            graph[node].forEach((importData, index) => {
-                const isLastChild = index === graph[node].length - 1;
-                const newIndent = `${indent}${isLast ? "    " : "|   "}`;
-                const connector = isLast ? "└── " : "├── ";
-                // Print the child node with the appropriate connector
-                console.log(`${newIndent}${connector}${importData.import_name} (imported from ${importData.child})`);
-                // Recursively print the children
-                printNode(importData.import_name, newIndent, isLastChild);
-            });
-        }
+        console.log(`${"   ".repeat(depth - 1)}${depth > 0 ? prefix : ""}${node} (import: ${parentPath})`);
+        // Mark this node as printed
+        printedNodes.add(node);
+        // Recursively print children
+        children.forEach((child, index) => {
+            const isChildLast = index === children.length - 1;
+            if (!printedNodes.has(child.import_name)) {
+                traverse(child.import_name, depth + 1, isChildLast);
+            }
+        });
     }
-    console.log("graph:");
-    for (const node in graph) {
-        // Only print the node once and skip the recursion if the node is already visited
-        if (!visited.has(node)) {
-            printNode(node);
+    // Traverse all top-level keys in the graph
+    for (const key in graph) {
+        if (!printedNodes.has(key)) {
+            console.log(`${key} (import: ${graph[key][0].parent_path || "root"})`);
+            traverse(key, 1, true);
         }
     }
 }
