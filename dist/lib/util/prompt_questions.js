@@ -18,10 +18,7 @@ const questions = [
         type: 'list',
         name: 'ansFormat',
         message: 'Do you want to see full dependencies or half ?',
-        choices: [
-            'full',
-            'half',
-        ],
+        choices: ['full', 'half'],
     },
     {
         type: 'input',

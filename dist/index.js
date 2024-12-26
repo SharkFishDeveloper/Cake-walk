@@ -39,7 +39,7 @@ function start() {
                         },
                     ],
                     exclude: [dependencies],
-                    dependencies: prompt_answer.ansFormat
+                    dependencies: prompt_answer.ansFormat,
                 };
                 let yamlString = js_yaml_1.default.dump(ymlData, {
                     indent: 8,
@@ -117,10 +117,15 @@ function handleParsedDataAfterPrompt() {
         //@ts-ignore
         let proj_dependenciesdependencies = parsedData.exclude[0];
         // console.log(startFiles,tags,startFiles.length,startFiles[0])
-        if (!startFiles || startFiles.length === 0 || startFiles.some(file => file.trim() === '')) {
+        if (!startFiles ||
+            startFiles.length === 0 ||
+            startFiles.some((file) => file.trim() === '')) {
             return console.log((0, cli_color_1.redBright)('Please enter the start files in Deepdive.yml ...'));
         }
-        if (!tags || tags.length === 0 || tags.some(file => file.trim() === '') || tags.length !== startFiles.length) {
+        if (!tags ||
+            tags.length === 0 ||
+            tags.some((file) => file.trim() === '') ||
+            tags.length !== startFiles.length) {
             return console.log((0, cli_color_1.redBright)('Please enter the start tags in Deepdive.yml ...'));
         }
         if (proj_dependenciesdependencies === null ||

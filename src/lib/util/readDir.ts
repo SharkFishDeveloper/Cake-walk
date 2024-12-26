@@ -5,10 +5,12 @@ interface FileInfo {
   name: string;
   short_path: string;
   full_path: string;
+  last_directory: string; // Add this field
 }
 
 export async function getFilesInDirectory(
-  dirPath: string
+  dirPath: string,
+  dirTag:string
 ): Promise<FileInfo[]> {
   let filesList: FileInfo[] = [];
 
@@ -30,16 +32,21 @@ export async function getFilesInDirectory(
       if (file === 'package.json' || file === '.git') {
         continue;
       }
+      
+
+//* :TODO: Remove all comments
 
       // If it's a directory, recurse into it
+
       if (stat.isDirectory()) {
         readDirectory(fullPath, rootDir);
       } else {
         // If it's a file, add it to the list
         filesList.push({
           name: file,
-          short_path: path.relative(rootDir, fullPath), // Relative path to the root directory
+          short_path: path.join(dirPath,path.relative(rootDir, fullPath)), // Relative path to the root directory
           full_path: fullPath, // Full absolute path
+          last_directory: path.basename(path.dirname(fullPath)), // Get the last directory name
         });
       }
     }

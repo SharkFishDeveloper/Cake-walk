@@ -1,9 +1,14 @@
 codebase:
   - ReactJs
 start:
+  - path: ./repo
+    tag: repo
   - path: ./repo/Fundrz-client/src/App.js
     tag: App.js
 exclude:
+  - react
+  - react-dom
+  - react-router-dom
   - react
   - react-dom
   - react-router-dom
@@ -28,4 +33,4 @@ exclude:
   - validator
   - web-vitals
   - tailwindcss
-dependencies: half
+dependencies: full

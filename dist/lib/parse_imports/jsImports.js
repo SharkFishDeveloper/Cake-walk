@@ -19,14 +19,13 @@ const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
 const read_dep_in_files_1 = require("../read_dependencies/read-dep-in-files");
 function INITIAL_START_parseJsImports(regex, proj_dependencies, child_path, // starting file location eg- src/pages/App.js
-tag, // starting file name eg- App.js
-finalAns, howToSeeDependencies) {
+tag, dirLocation, dirTag, finalAns, howToSeeDependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         let edges = [];
         let child_path_with_parent_path = path_1.default.join(process.cwd(), child_path);
         let importsInAFile = [];
         yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_path_with_parent_path);
-        // console.log(importsInAFile)
+        let refinedImports = [];
         const parent_full_path = path_1.default.join(process.cwd(), child_path);
         for (let i = 0; i < importsInAFile.length; i++) {
             const imp = importsInAFile[i];
@@ -40,42 +39,25 @@ finalAns, howToSeeDependencies) {
                     if (fs_1.default.existsSync(temp_path)) {
                         path_Child_Complete = temp_path;
                         break;
-                        // console.log(path_Child_Complete)
                     }
                 }
             }
             if (fs_1.default.existsSync(path_Child_Complete)) {
+                refinedImports.push(path_Child_Complete);
                 yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag, edges);
             }
             // break;
         }
         // await createHtmlFile(graph,tag);
         const graph = createGraph(edges);
-        // console.log(graph)
-        // const graph = {
-        //   'App.js': [
-        //     {
-        //       child: './User/SignUP.jsx',
-        //       import_name: 'SignUp',
-        //       parent_path: './repo/Fundrz-client/src/App.js'
-        //     }
-        //   ],
-        //   SignUp: [
-        //     {
-        //       child: '../UserContx/UserContext.js',
-        //       import_name: 'UserContext',
-        //       parent_path: './User/SignUP.jsx'
-        //     },
-        //     {
-        //       child: '../IP.js',
-        //       import_name: 'deployedIp',
-        //       parent_path: './User/SignUP.jsx'
-        //     }
-        //   ]}
-        // console.log(graph)
-        printDependencyTree(graph, howToSeeDependencies);
-        // printHierarchy(edges);
-        // console.log("graph",graph)
+        if (refinedImports.length > 0) {
+            // console.log(greenBright("Start",importsInAFile.length,importsInAFile.map((imp)=>{
+            //   console.log(imp.from)
+            // })));
+            console.log((0, cli_color_1.greenBright)("Start"));
+            printDependencyTree(graph, howToSeeDependencies);
+            console.log("\n");
+        }
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
@@ -83,15 +65,20 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
     return __awaiter(this, void 0, void 0, function* () {
         let importsInAFile = [];
         // console.log(parent_name,magenta("->"),childName,yellow("->"),node_half_path)
-        edges.push({ parent: parent_name, child: child_half_path, import_name: childName, parent_path: node_full_path,
-            child_full_path: child_full_path, parent_half_path: node_half_path
+        edges.push({
+            parent: parent_name,
+            child: child_half_path,
+            import_name: childName,
+            parent_path: node_full_path,
+            child_full_path: child_full_path,
+            parent_half_path: node_half_path,
         });
         // console.log(bgBlack(yellow("parent:",node_half_path , "child:",child_half_path,green("import_name:",white(childName)),"\n"),blue("parentName: ",parent_name),))
         yield (0, read_dep_in_files_1.checkDependenciesInFile)(importsInAFile, proj_dependencies, regex, child_full_path);
         if (importsInAFile.length > 0) {
             for (const imp of importsInAFile) {
                 let child_path = path_1.default.join(path_1.default.dirname(child_full_path), imp.from);
-                let pathChild_withExtension = "DNE";
+                let pathChild_withExtension = 'DNE';
                 let extOfFile = null;
                 if (!fs_1.default.existsSync(child_path)) {
                     for (const ext of jstsExtensions_1.default) {
@@ -107,7 +94,7 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
                     pathChild_withExtension = child_path;
                 }
                 const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
-                if (pathChild_withExtension !== "DNE") {
+                if (pathChild_withExtension !== 'DNE') {
                     yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path, childName, edges);
                 }
             }
@@ -117,13 +104,19 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
 exports.parseJsImportsDFS = parseJsImportsDFS;
 const createGraph = (edges) => {
     const graph = {};
-    edges.forEach(({ parent, child, import_name, parent_path, child_full_path, parent_half_path }) => {
+    edges.forEach(({ parent, child, import_name, parent_path, child_full_path, parent_half_path, }) => {
         if (!graph[parent]) {
             graph[parent] = [];
         }
-        const childExists = graph[parent].some(entry => entry.child === child);
+        const childExists = graph[parent].some((entry) => entry.child === child);
         if (!childExists) {
-            graph[parent].push({ child, import_name, parent_path, child_full_path, parent_half_path });
+            graph[parent].push({
+                child,
+                import_name,
+                parent_path,
+                child_full_path,
+                parent_half_path,
+            });
         }
     });
     return graph;
@@ -132,36 +125,38 @@ function printDependencyTree(graph, howToSeeDependencies) {
     const printedNodes = new Set(); // Track printed nodes to avoid repetition
     const nodeNumbers = new Map(); // Map to store the first occurrence import number of each node
     let counter = 1; // Initialize counter to start numbering
-    function traverse(node, depth = 0, isLast = true, parentPath = "") {
+    function traverse(node, depth = 0, isLast = true, parentPath = '') {
         // Check if node has already been printed (duplicate case)
         if (printedNodes.has(node)) {
-            const nodeParent = "   ".repeat(depth) + (isLast ? "    └── " : "    ├── ");
-            const currentParentPath = parentPath || "";
+            const nodeParent = '   '.repeat(depth) + (isLast ? '    └── ' : '    ├── ');
+            const currentParentPath = parentPath || '';
             // Print the duplicate node with its import number from the first occurrence
-            console.log(`${"   ".repeat(depth)}${(0, cli_color_1.green)(nodeParent)}${(0, cli_color_1.cyan)(node)} ${(0, cli_color_1.yellow)(`(${currentParentPath})`)} ${graph[node] ? `[Duplicate goto -> ${(0, cli_color_1.green)(`(${nodeNumbers.get(node)})`)}]` : ""}`);
+            console.log(`${'   '.repeat(depth)}${(0, cli_color_1.green)(nodeParent)}${(0, cli_color_1.cyan)(node)} ${(0, cli_color_1.yellow)(`(${currentParentPath})`)} ${graph[node] ? `[Duplicate goto -> ${(0, cli_color_1.green)(`(${nodeNumbers.get(node)})`)}]` : ''}`);
             return;
         }
         //└──→ " : "├──→ ");
-        // Create prefix for the node 
-        const prefix = "   ".repeat(depth) + (isLast ? "    └── " : "    ├── ");
+        // Create prefix for the node
+        const prefix = '   '.repeat(depth) + (isLast ? '    └── ' : '    ├── ');
         const children = graph[node] || [];
         // Determine the parent import path
-        const currentParentPath = parentPath || ""; // Default to empty for top node
-        console.log(`${"   ".repeat(depth)}${(0, cli_color_1.green)(prefix)}${(0, cli_color_1.cyan)(node)} ${(0, cli_color_1.yellow)(`(${currentParentPath})`)} ${(0, cli_color_1.magenta)(`(${counter++})`)}`);
+        const currentParentPath = parentPath || ''; // Default to empty for top node
+        console.log(`${'   '.repeat(depth)}${(0, cli_color_1.green)(prefix)}${(0, cli_color_1.cyan)(node)} ${(0, cli_color_1.yellow)(`(${currentParentPath})`)} ${(0, cli_color_1.magenta)(`(${counter++})`)}`);
         // Mark this node as printed and store the import number for duplicates
         printedNodes.add(node);
         nodeNumbers.set(node, counter - 1); // Store the import number of the first occurrence
         // Recursively print children
         children.forEach((child, index) => {
             const isChildLast = index === children.length - 1;
-            traverse(child.import_name, depth + 1, isChildLast, howToSeeDependencies === "half" ? child.child : child.child_full_path);
+            traverse(child.import_name, depth + 1, isChildLast, howToSeeDependencies === 'half' ? child.child : child.child_full_path);
         });
     }
     // Traverse all top-level keys in the graph
     for (const key in graph) {
         if (!printedNodes.has(key)) {
             // console.log(graph[key][0], graph[key][0].parent_half_path,)
-            traverse(key, 0, true, howToSeeDependencies === "half" ? graph[key][0].parent_half_path : graph[key][0].parent_path);
+            traverse(key, 0, true, howToSeeDependencies === 'half'
+                ? graph[key][0].parent_half_path
+                : graph[key][0].parent_path);
         }
     }
 }

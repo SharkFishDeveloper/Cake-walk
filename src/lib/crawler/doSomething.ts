@@ -1,8 +1,8 @@
 import jsRegex from '../regex/javascript';
 import { INITIAL_START_parseJsImports } from '../parse_imports/jsImports';
-import { blueBright, greenBright, redBright } from 'cli-color';
+import { blueBright, cyanBright, greenBright, magentaBright, red, redBright, whiteBright } from 'cli-color';
 import { getFilesInDirectory } from '../util/readDir';
-// import { createSpinner} from 'nanospinner';
+import fs from "fs";
 
 let regex: RegExp;
 let proj_dependencies: string[];
@@ -25,9 +25,30 @@ export async function doSomething(
     case 'ReactJs':
       regex = jsRegex;
 
-      const files = await getFilesInDirectory('repo');
-      console.log(files);
-      console.log('END');
+      for (let i = 0; i < startfileArray.length; i++) {
+        const stat = await fs.promises.lstat(startfileArray[i]);
+       try {
+        if (stat.isDirectory()) {
+          console.log(whiteBright("Processed :--> ", tags[i], "\n"));
+          const filesArray = await getFilesInDirectory("./repo","repo");
+          for (let j = 0; j < filesArray.length; j++) {
+            // console.log(greenBright("<--Next-->",filesArray[j].name));
+           
+            await readImports(filesArray[j].short_path, filesArray[j].name, "./repo", "repo" ,finalAns, howToSeeDependencies);
+
+          }
+        }
+        else if (stat.isFile()) {
+          console.log(whiteBright("Processed :--> ", tags[i], "\n"));
+          await readImports(startfileArray[i], tags[i],"","" ,finalAns, howToSeeDependencies);
+          // console.log(greenBright("<--Next-->"));
+        }
+       } catch (error) {
+        console.log(red('An error occurred during file processing.',error))
+       }finally{
+        console.log(blueBright("<--Finished-->","\n"));
+       }
+      }
     // try {
     //   for (let i = 0; i < startfileArray.length; i++) {
     //     console.log(blueBright("Processed file:--> ", tags[i], "\n"));
@@ -47,6 +68,8 @@ export async function doSomething(
 export async function readImports(
   startfile: string,
   tag: string,
+  dirLocation: string,
+  dirTag: string,
   finalAns: ImportsMap,
   howToSeeDependencies: string
 ) {
@@ -56,6 +79,8 @@ export async function readImports(
       proj_dependencies,
       startfile,
       tag,
+      dirLocation,
+      dirTag,
       finalAns,
       howToSeeDependencies
     );

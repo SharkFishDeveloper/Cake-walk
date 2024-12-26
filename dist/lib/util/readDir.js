@@ -35,7 +35,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFilesInDirectory = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-function getFilesInDirectory(dirPath) {
+function getFilesInDirectory(dirPath, dirTag) {
     return __awaiter(this, void 0, void 0, function* () {
         let filesList = [];
         // Check if the provided path is a valid directory
@@ -53,6 +53,7 @@ function getFilesInDirectory(dirPath) {
                 if (file === 'package.json' || file === '.git') {
                     continue;
                 }
+                //* :TODO: Remove all comments
                 // If it's a directory, recurse into it
                 if (stat.isDirectory()) {
                     readDirectory(fullPath, rootDir);
@@ -61,8 +62,9 @@ function getFilesInDirectory(dirPath) {
                     // If it's a file, add it to the list
                     filesList.push({
                         name: file,
-                        short_path: path.relative(rootDir, fullPath), // Relative path to the root directory
-                        full_path: fullPath // Full absolute path
+                        short_path: path.join(dirPath, path.relative(rootDir, fullPath)), // Relative path to the root directory
+                        full_path: fullPath, // Full absolute path
+                        last_directory: path.basename(path.dirname(fullPath)), // Get the last directory name
                     });
                 }
             }

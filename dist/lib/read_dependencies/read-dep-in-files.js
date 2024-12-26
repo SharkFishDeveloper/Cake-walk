@@ -17,12 +17,12 @@ const fs_1 = __importDefault(require("fs"));
 function checkDependenciesInFile(importsData, proj_dependencies, regex, parent_path) {
     return __awaiter(this, void 0, void 0, function* () {
         let file_path = parent_path;
-        const file_content = fs_1.default.readFileSync(file_path, "utf-8");
+        const file_content = fs_1.default.readFileSync(file_path, 'utf-8');
         let match;
         while ((match = regex.exec(file_content)) !== null) {
             const imports = match[1];
             const from = match[2];
-            if (!proj_dependencies.some(dep => from.startsWith(dep))) {
+            if (!proj_dependencies.some((dep) => from.startsWith(dep))) {
                 if (imports.startsWith('{')) {
                     const importsList = imports
                         .replace(/[{}]/g, '')

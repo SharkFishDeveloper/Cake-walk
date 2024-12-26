@@ -1,4 +1,4 @@
-import { cyan, green, magenta, yellow } from 'cli-color';
+import { cyan, green, greenBright, magenta, yellow } from 'cli-color';
 import fs from 'fs';
 import path from 'path';
 import TsJsextensions from '../extensions/jstsExtensions';
@@ -10,7 +10,9 @@ export async function INITIAL_START_parseJsImports(
   regex: RegExp,
   proj_dependencies: string[],
   child_path: string, // starting file location eg- src/pages/App.js
-  tag: string, // starting file name eg- App.js
+  tag: string,
+  dirLocation: string,
+  dirTag: string,
   finalAns: ImportsMap,
   howToSeeDependencies: string
 ) {
@@ -27,7 +29,7 @@ export async function INITIAL_START_parseJsImports(
     child_path_with_parent_path
   );
 
-  // console.log(importsInAFile)
+  let refinedImports:string[] = [];
   const parent_full_path = path.join(process.cwd(), child_path);
 
   for (let i = 0; i < importsInAFile.length; i++) {
@@ -47,12 +49,14 @@ export async function INITIAL_START_parseJsImports(
         if (fs.existsSync(temp_path)) {
           path_Child_Complete = temp_path;
           break;
-          // console.log(path_Child_Complete)
         }
       }
     }
 
+   
+
     if (fs.existsSync(path_Child_Complete)) {
+      refinedImports.push(path_Child_Complete);
       await parseJsImportsDFS(
         regex,
         proj_dependencies,
@@ -70,33 +74,26 @@ export async function INITIAL_START_parseJsImports(
   }
   // await createHtmlFile(graph,tag);
   const graph = createGraph(edges);
-  // console.log(graph)
-  // const graph = {
-  //   'App.js': [
-  //     {
-  //       child: './User/SignUP.jsx',
-  //       import_name: 'SignUp',
-  //       parent_path: './repo/Fundrz-client/src/App.js'
-  //     }
-  //   ],
-  //   SignUp: [
-  //     {
-  //       child: '../UserContx/UserContext.js',
-  //       import_name: 'UserContext',
-  //       parent_path: './User/SignUP.jsx'
-  //     },
-  //     {
-  //       child: '../IP.js',
-  //       import_name: 'deployedIp',
-  //       parent_path: './User/SignUP.jsx'
-  //     }
-  //   ]}
-  // console.log(graph)
-
-  printDependencyTree(graph, howToSeeDependencies);
-  // printHierarchy(edges);
-  // console.log("graph",graph)
+  if(refinedImports.length > 0)
+    {
+        // console.log(greenBright("Start",importsInAFile.length,importsInAFile.map((imp)=>{
+        //   console.log(imp.from)
+        // })));
+        console.log(greenBright("Start"))
+        printDependencyTree(graph, howToSeeDependencies);
+        console.log("\n")
+    }
 }
+
+
+
+
+
+
+
+
+
+
 
 export async function parseJsImportsDFS(
   regex: RegExp,

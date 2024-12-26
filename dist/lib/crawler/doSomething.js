@@ -17,7 +17,7 @@ const javascript_1 = __importDefault(require("../regex/javascript"));
 const jsImports_1 = require("../parse_imports/jsImports");
 const cli_color_1 = require("cli-color");
 const readDir_1 = require("../util/readDir");
-// import { createSpinner} from 'nanospinner';
+const fs_1 = __importDefault(require("fs"));
 let regex;
 let proj_dependencies;
 function doSomething(startfileArray, tags, language, dependencies, finalAns, howToSeeDependencies) {
@@ -30,9 +30,30 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns, how
             case 'NextJs':
             case 'ReactJs':
                 regex = javascript_1.default;
-                const files = yield (0, readDir_1.getFilesInDirectory)('repo');
-                console.log(files);
-                console.log("END");
+                for (let i = 0; i < startfileArray.length; i++) {
+                    const stat = yield fs_1.default.promises.lstat(startfileArray[i]);
+                    try {
+                        if (stat.isDirectory()) {
+                            console.log((0, cli_color_1.whiteBright)("Processed :--> ", tags[i], "\n"));
+                            const filesArray = yield (0, readDir_1.getFilesInDirectory)("./repo", "repo");
+                            for (let j = 0; j < filesArray.length; j++) {
+                                // console.log(greenBright("<--Next-->",filesArray[j].name));
+                                yield readImports(filesArray[j].short_path, filesArray[j].name, "./repo", "repo", finalAns, howToSeeDependencies);
+                            }
+                        }
+                        else if (stat.isFile()) {
+                            console.log((0, cli_color_1.whiteBright)("Processed :--> ", tags[i], "\n"));
+                            yield readImports(startfileArray[i], tags[i], "", "", finalAns, howToSeeDependencies);
+                            // console.log(greenBright("<--Next-->"));
+                        }
+                    }
+                    catch (error) {
+                        console.log((0, cli_color_1.red)('An error occurred during file processing.', error));
+                    }
+                    finally {
+                        console.log((0, cli_color_1.blueBright)("<--Finished-->", "\n"));
+                    }
+                }
             // try {
             //   for (let i = 0; i < startfileArray.length; i++) {
             //     console.log(blueBright("Processed file:--> ", tags[i], "\n"));
@@ -48,10 +69,10 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns, how
     });
 }
 exports.doSomething = doSomething;
-function readImports(startfile, tag, finalAns, howToSeeDependencies) {
+function readImports(startfile, tag, dirLocation, dirTag, finalAns, howToSeeDependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile, tag, finalAns, howToSeeDependencies);
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile, tag, dirLocation, dirTag, finalAns, howToSeeDependencies);
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));
