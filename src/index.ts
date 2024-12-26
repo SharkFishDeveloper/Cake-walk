@@ -78,6 +78,7 @@ async function processDependencies(
   all_dependencies: string[],
   language: string
 ) {
+  
   for (const start of startFiles || []) {
     //@ts-ignore
     const dependencies = await readDependenciesFromPromt(
@@ -155,7 +156,7 @@ async function handleParsedDataAfterPrompt() {
 
   //* < ------- >
   //* this function is just for reading the starting Files and all their dependencies
-  await processDependencies(startFiles, all_dependencies, language[0]);
+  // await processDependencies(startFiles, all_dependencies, language[0]);
   // console.log(all_dependencies)
   //* < ------- >
 // return;

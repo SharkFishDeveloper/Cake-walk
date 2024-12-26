@@ -31,7 +31,7 @@ export async function doSomething(
        try {
         if (stat.isDirectory()) {
           console.log(whiteBright("Processed :--> ", tags[i], "\n"));
-          const filesArray = await getFilesInDirectory("./repo","repo",excludeFolders);
+          const filesArray = await getFilesInDirectory(startfileArray[i],tags[i],excludeFolders);
           for (let j = 0; j < filesArray.length; j++) {
             // console.log(greenBright("<--Next-->",filesArray[j].name));
            

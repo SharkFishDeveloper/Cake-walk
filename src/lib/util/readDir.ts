@@ -41,11 +41,12 @@ export async function getFilesInDirectory(
         // Add the file to the list
         filesList.push({
           name: file,
-          short_path: path.join(dirTag, path.relative(rootDir, fullPath)),
+          short_path: path.join(dirPath, path.relative(rootDir, fullPath)),
           full_path: fullPath,
           last_directory: path.basename(path.dirname(fullPath)),
         });
       }
+      // console.log(dirTag, rootDir, fullPath);
     }
   };
 

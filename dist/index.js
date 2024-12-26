@@ -80,7 +80,6 @@ function processDependencies(startFiles, all_dependencies, language) {
         for (const start of startFiles || []) {
             //@ts-ignore
             const dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(language, start);
-            // Ensure that 'react' and 'react-router-dom' are always added
             all_dependencies.push('react', 'react-router-dom', ...dependencies);
         }
         // Read the existing YAML file
@@ -92,7 +91,6 @@ function processDependencies(startFiles, all_dependencies, language) {
             const existingExcludes = Array.isArray(parsedYaml['exclude'])
                 ? parsedYaml['exclude']
                 : [];
-            // Ensure we merge without duplicates
             const combinedExcludes = [...new Set([...existingExcludes, ...all_dependencies])];
             //@ts-ignore
             parsedYaml['exclude'] = combinedExcludes;
@@ -135,7 +133,7 @@ function handleParsedDataAfterPrompt() {
         let all_dependencies = [];
         //* < ------- >
         //* this function is just for reading the starting Files and all their dependencies
-        yield processDependencies(startFiles, all_dependencies, language[0]);
+        // await processDependencies(startFiles, all_dependencies, language[0]);
         // console.log(all_dependencies)
         //* < ------- >
         // return;

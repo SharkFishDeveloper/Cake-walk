@@ -1,42 +1,36 @@
-
 codebase:
-        - ReactJs
-
+  - ReactJs
 start:
-        -
-                path: ./repo
-                tag: repo
+  - path: ./repo/Fundrz-client/src/App.js
+    tag: App.js
 pathVisibility: full
-
 excludeFolders:
-        - node_modules
-        - .git
-        - .gitignore
-        - package-lock.json
-        - package.json
-        - public
-        - README.md
-
+  - node_modules
+  - .git
+  - .gitignore
+  - package-lock.json
+  - package.json
+  - public
+  - README.md
 exclude:
-        -
-                - '@fortawesome/fontawesome'
-                - '@headlessui/react'
-                - '@heroicons/react'
-                - '@ramonak/react-progress-bar'
-                - '@testing-library/jest-dom'
-                - '@testing-library/react'
-                - '@testing-library/user-event'
-                - axios
-                - country-state-city
-                - js-cookie
-                - rc-progress
-                - react
-                - react-cookie
-                - react-country-region-selector
-                - react-dom
-                - react-icons
-                - react-router-dom
-                - react-scripts
-                - validator
-                - web-vitals
-                - tailwindcss
+  - react
+  - react-router-dom
+  - '@fortawesome/fontawesome'
+  - '@headlessui/react'
+  - '@heroicons/react'
+  - '@ramonak/react-progress-bar'
+  - '@testing-library/jest-dom'
+  - '@testing-library/react'
+  - '@testing-library/user-event'
+  - axios
+  - country-state-city
+  - js-cookie
+  - rc-progress
+  - react-cookie
+  - react-country-region-selector
+  - react-dom
+  - react-icons
+  - react-scripts
+  - validator
+  - web-vitals
+  - tailwindcss
