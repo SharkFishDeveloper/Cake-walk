@@ -1,17 +1,15 @@
-import { Graph } from "../interfaces/Graph";
-import fs from "fs";
-import http from "http";
-import {open} from "openurl"
-import generateHTML from "./generateHtml";
+import { Graph } from '../interfaces/Graph';
+import fs from 'fs';
+import http from 'http';
+import { open } from 'openurl';
+import generateHTML from './generateHtml';
 
+async function createHtmlFile(graph: Graph, start: string) {
+  const htmlFilePath = './graph.html';
+  fs.writeFileSync(htmlFilePath, generateHTML(graph, start), 'utf8');
 
-
-async function createHtmlFile(graph:Graph,start:string) {
-    const htmlFilePath = './graph.html';
-    fs.writeFileSync(htmlFilePath, generateHTML(graph,start), 'utf8');
-    
-// Serve the HTML file
-const server = http.createServer((req, res) => {
+  // Serve the HTML file
+  const server = http.createServer((req, res) => {
     if (req.url === '/') {
       fs.readFile(htmlFilePath, (err, data) => {
         if (err) {
@@ -32,11 +30,11 @@ const server = http.createServer((req, res) => {
   server.listen(port, () => {
     open(`http://localhost:${port}`);
     setTimeout(() => {
-        server.close(() => {
-          fs.unlinkSync(htmlFilePath); 
-        });
-      }, 1000);
+      server.close(() => {
+        fs.unlinkSync(htmlFilePath);
+      });
+    }, 1000);
   });
 }
 
-export {createHtmlFile};
+export { createHtmlFile };

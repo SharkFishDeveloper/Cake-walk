@@ -29,7 +29,7 @@ async function start() {
           },
         ],
         exclude: [dependencies],
-        dependencies:prompt_answer.ansFormat
+        dependencies: prompt_answer.ansFormat,
       };
 
       let yamlString = yaml.dump(ymlData, {
@@ -99,10 +99,12 @@ async function handleParsedDataAfterPrompt() {
   // return;
   //@ts-ignore
   let language: string | null = parsedData.codebase;
-   //@ts-ignore
+  //@ts-ignore
   let howToSeeDependencies: string | null = parsedData.dependencies;
   if (!howToSeeDependencies || howToSeeDependencies === null) {
-    return console.log(redBright('Please fill how to see dependencies in Deepdive.yml ...'));
+    return console.log(
+      redBright('Please fill how to see dependencies in Deepdive.yml ...')
+    );
   }
 
   if (
@@ -125,18 +127,26 @@ async function handleParsedDataAfterPrompt() {
   //@ts-ignore
   let proj_dependenciesdependencies: string[] | null = parsedData.exclude[0];
   // console.log(startFiles,tags,startFiles.length,startFiles[0])
-  if (!startFiles || startFiles.length === 0 || startFiles.some(file => file.trim() === '')) {
+  if (
+    !startFiles ||
+    startFiles.length === 0 ||
+    startFiles.some((file) => file.trim() === '')
+  ) {
     return console.log(
       redBright('Please enter the start files in Deepdive.yml ...')
     );
   }
 
-  if (!tags || tags.length === 0 || tags.some(file => file.trim() === '') || tags.length !== startFiles.length) {
+  if (
+    !tags ||
+    tags.length === 0 ||
+    tags.some((file) => file.trim() === '') ||
+    tags.length !== startFiles.length
+  ) {
     return console.log(
       redBright('Please enter the start tags in Deepdive.yml ...')
     );
   }
-
 
   if (
     proj_dependenciesdependencies === null ||

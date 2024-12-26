@@ -1,4 +1,4 @@
-import { Graph } from "../interfaces/Graph";
+import { Graph } from '../interfaces/Graph';
 
 const generateHTML = (graph: Graph, start: string): string => `
 <!DOCTYPE html>

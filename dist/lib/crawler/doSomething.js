@@ -16,6 +16,7 @@ exports.readImports = exports.doSomething = void 0;
 const javascript_1 = __importDefault(require("../regex/javascript"));
 const jsImports_1 = require("../parse_imports/jsImports");
 const cli_color_1 = require("cli-color");
+const readDir_1 = require("../util/readDir");
 // import { createSpinner} from 'nanospinner';
 let regex;
 let proj_dependencies;
@@ -29,19 +30,20 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns, how
             case 'NextJs':
             case 'ReactJs':
                 regex = javascript_1.default;
-                // const spinner = createSpinner().start();
-                try {
-                    for (let i = 0; i < startfileArray.length; i++) {
-                        console.log((0, cli_color_1.blueBright)("Processed file:--> ", tags[i], "\n"));
-                        console.log("Start");
-                        yield readImports(startfileArray[i], tags[i], finalAns, howToSeeDependencies);
-                    }
-                    console.log((0, cli_color_1.greenBright)("<--Finished-->"));
-                }
-                catch (error) {
-                    console.error('An error occurred during file processing.');
-                    console.error(error);
-                }
+                const files = yield (0, readDir_1.getFilesInDirectory)('repo');
+                console.log(files);
+                console.log("END");
+            // try {
+            //   for (let i = 0; i < startfileArray.length; i++) {
+            //     console.log(blueBright("Processed file:--> ", tags[i], "\n"));
+            //     console.log("Start");
+            //     await readImports(startfileArray[i], tags[i], finalAns, howToSeeDependencies);
+            //   }
+            //   console.log(greenBright("<--Finished-->"));
+            // } catch (error) {
+            //   console.error('An error occurred during file processing.');
+            //   console.error(error);
+            // }
         }
     });
 }
