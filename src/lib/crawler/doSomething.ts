@@ -13,7 +13,8 @@ export async function doSomething(
   language: string,
   dependencies: string[],
   finalAns: ImportsMap,
-  howToSeeDependencies: string
+  howToSeeDependencies: string,
+  excludeFolders: string[]
 ) {
   proj_dependencies = dependencies;
 
@@ -30,7 +31,7 @@ export async function doSomething(
        try {
         if (stat.isDirectory()) {
           console.log(whiteBright("Processed :--> ", tags[i], "\n"));
-          const filesArray = await getFilesInDirectory("./repo","repo");
+          const filesArray = await getFilesInDirectory("./repo","repo",excludeFolders);
           for (let j = 0; j < filesArray.length; j++) {
             // console.log(greenBright("<--Next-->",filesArray[j].name));
            

@@ -35,7 +35,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFilesInDirectory = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-function getFilesInDirectory(dirPath, dirTag) {
+function getFilesInDirectory(dirPath, dirTag, excludeFolders // Array of folder or file names to exclude
+) {
     return __awaiter(this, void 0, void 0, function* () {
         let filesList = [];
         // Check if the provided path is a valid directory
@@ -47,24 +48,23 @@ function getFilesInDirectory(dirPath, dirTag) {
         const readDirectory = (currentDir, rootDir) => {
             const files = fs.readdirSync(currentDir);
             for (const file of files) {
-                const fullPath = path.resolve(currentDir, file); // Use path.resolve for full absolute path
+                const fullPath = path.resolve(currentDir, file);
                 const stat = fs.lstatSync(fullPath);
-                // Exclude .git and package.json
-                if (file === 'package.json' || file === '.git') {
+                // Check if the current file/folder should be excluded
+                if (excludeFolders.includes(file)) {
                     continue;
                 }
-                //* :TODO: Remove all comments
-                // If it's a directory, recurse into it
                 if (stat.isDirectory()) {
+                    // Recursively process the directory if not excluded
                     readDirectory(fullPath, rootDir);
                 }
                 else {
-                    // If it's a file, add it to the list
+                    // Add the file to the list
                     filesList.push({
                         name: file,
-                        short_path: path.join(dirPath, path.relative(rootDir, fullPath)), // Relative path to the root directory
-                        full_path: fullPath, // Full absolute path
-                        last_directory: path.basename(path.dirname(fullPath)), // Get the last directory name
+                        short_path: path.join(dirTag, path.relative(rootDir, fullPath)),
+                        full_path: fullPath,
+                        last_directory: path.basename(path.dirname(fullPath)),
                     });
                 }
             }
@@ -75,5 +75,3 @@ function getFilesInDirectory(dirPath, dirTag) {
     });
 }
 exports.getFilesInDirectory = getFilesInDirectory;
-// Example usage
-// getFilesInDirectory('repo').then(files => console.log(files));

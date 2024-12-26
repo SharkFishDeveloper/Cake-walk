@@ -26,7 +26,8 @@ function start() {
         try {
             //? Add logic so it does not ask question again and agai
             // fs.rmSync('deepdive.yml', { force: true });
-            if (!fs_1.default.existsSync('deepdive.yml')) {
+            if (!fs_1.default.existsSync('barrenland.yml')) {
+                // console.log("DEONS not exists")
                 //@ts-ignore
                 const prompt_answer = yield inquirer_1.default.prompt(prompt_questions_js_1.default);
                 let dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(prompt_answer.language, prompt_answer.startPoint);
@@ -38,8 +39,17 @@ function start() {
                             tag: prompt_answer.startPointTag,
                         },
                     ],
+                    pathVisibility: prompt_answer.ansFormat,
+                    excludeFolders: [
+                        'node_modules',
+                        '.git',
+                        '.gitignore',
+                        'package-lock.json',
+                        'package.json',
+                        'public',
+                        'README.md'
+                    ],
                     exclude: [dependencies],
-                    dependencies: prompt_answer.ansFormat,
                 };
                 let yamlString = js_yaml_1.default.dump(ymlData, {
                     indent: 8,
@@ -48,13 +58,14 @@ function start() {
                     skipInvalid: true,
                 });
                 yamlString = yamlString.replace(/^(\w+):\n/gm, '\n$1:\n');
-                fs_1.default.writeFileSync('deepdive.yml', yamlString);
+                fs_1.default.writeFileSync('barrenland.yml', yamlString);
                 console.log((0, cli_color_1.yellowBright)(`I made deepdive.yml file, please fill it and then continue. 
           Feel free to edit it! You can:
           - Add multiple starting points
           - Exclude any files or directories`));
             }
             else {
+                // console.log("Exists")
                 //* if yml is already present, then perform this FX
                 yield handleParsedDataAfterPrompt();
             }
@@ -69,26 +80,33 @@ function processDependencies(startFiles, all_dependencies, language) {
         for (const start of startFiles || []) {
             //@ts-ignore
             const dependencies = yield (0, prompt_depedecy_list_1.readDependenciesFromPromt)(language, start);
-            all_dependencies.push(...dependencies);
-            // console.log(all_dependencies)
+            // Ensure that 'react' and 'react-router-dom' are always added
+            all_dependencies.push('react', 'react-router-dom', ...dependencies);
         }
-        // console.log('all_dependencies', all_dependencies);
-        const yamlString = fs_1.default.readFileSync('deepdive.yml', 'utf-8');
+        // Read the existing YAML file
+        const yamlString = fs_1.default.readFileSync('barrenland.yml', 'utf-8');
         const parsedYaml = js_yaml_1.default.load(yamlString);
-        // Step 3: Modify the specific heading (assuming the heading is a key in the object)
+        // Step 3: Merge existing exclude data with new dependencies
         if (parsedYaml && typeof parsedYaml === 'object') {
             //@ts-ignore
-            parsedYaml['exclude'] = all_dependencies;
+            const existingExcludes = Array.isArray(parsedYaml['exclude'])
+                ? parsedYaml['exclude']
+                : [];
+            // Ensure we merge without duplicates
+            const combinedExcludes = [...new Set([...existingExcludes, ...all_dependencies])];
+            //@ts-ignore
+            parsedYaml['exclude'] = combinedExcludes;
         }
+        // Convert updated object back to YAML
         const updatedYamlString = js_yaml_1.default.dump(parsedYaml);
-        // Step 5: Write the updated YAML string back to the file
-        fs_1.default.writeFileSync('deepdive.yml', updatedYamlString);
+        // Write the updated YAML string back to the file
+        fs_1.default.writeFileSync('barrenland.yml', updatedYamlString);
         return;
     });
 }
 function handleParsedDataAfterPrompt() {
     return __awaiter(this, void 0, void 0, function* () {
-        const fileContent = fs_1.default.readFileSync('deepdive.yml', 'utf8');
+        const fileContent = fs_1.default.readFileSync('barrenland.yml', 'utf8');
         const parsedData = js_yaml_1.default.load(fileContent);
         //@ts-ignore
         let dataOfYml = parsedData.start;
@@ -98,9 +116,14 @@ function handleParsedDataAfterPrompt() {
         //@ts-ignore
         let language = parsedData.codebase;
         //@ts-ignore
-        let howToSeeDependencies = parsedData.dependencies;
+        let howToSeeDependencies = parsedData.pathVisibility;
         if (!howToSeeDependencies || howToSeeDependencies === null) {
             return console.log((0, cli_color_1.redBright)('Please fill how to see dependencies in Deepdive.yml ...'));
+        }
+        //@ts-ignore
+        let excludeFolders = parsedData.excludeFolders;
+        if (!excludeFolders || excludeFolders === null || excludeFolders.length === 0) {
+            return console.log((0, cli_color_1.redBright)('Please fill the folders you want to  exclude, like node_modules ...'));
         }
         if (language === null ||
             !language ||
@@ -113,7 +136,9 @@ function handleParsedDataAfterPrompt() {
         //* < ------- >
         //* this function is just for reading the starting Files and all their dependencies
         yield processDependencies(startFiles, all_dependencies, language[0]);
+        // console.log(all_dependencies)
         //* < ------- >
+        // return;
         //@ts-ignore
         let proj_dependenciesdependencies = parsedData.exclude[0];
         // console.log(startFiles,tags,startFiles.length,startFiles[0])
@@ -133,7 +158,7 @@ function handleParsedDataAfterPrompt() {
             return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
         }
         let finalAns = {};
-        yield (0, doSomething_1.doSomething)(startFiles, tags, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns, howToSeeDependencies);
+        yield (0, doSomething_1.doSomething)(startFiles, tags, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns, howToSeeDependencies, excludeFolders);
     });
 }
 start();

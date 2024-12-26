@@ -17,10 +17,6 @@ export async function readDependenciesFromPromt(
       let relativeDirDependencies = await readPackageJsonForEachDir(startPoint);
       //* <----->
       answerDependencies = [
-        // ...allDependenciesForJsTs,
-        'react',
-        'react-dom',
-        'react-router-dom',
         ...relativeDirDependencies,
       ];
   }
@@ -29,39 +25,50 @@ export async function readDependenciesFromPromt(
 
 export default readDependenciesFromPromt;
 
-async function readPackageJsonForEachDir(startPoint: string) {
-  const parts = startPoint.split('/');
-  const subPaths: string[] = [];
+
+
+async function readPackageJsonForEachDir(startPoint: string): Promise<string[]> {
   const dependencies: string[] = [];
-  for (let i = 1; i <= parts.length; i++) {
-    const subPath = parts.slice(1, i).join('/');
-    if (subPath) {
-      const fullPath = path.join(process.cwd(), subPath);
-      const isDir =
-        fs.existsSync(fullPath) && fs.lstatSync(fullPath).isDirectory();
 
-      if (isDir) {
-        subPaths.push(fullPath);
+  // Recursive helper function to traverse directories
+  function traverseDir(directory: string) {
+    if (fs.existsSync(directory) && fs.lstatSync(directory).isDirectory()) {
+      // Prevent going into node_modules
+      if (directory.includes('node_modules')) return;
 
-        // Check if package.json exists in the directory
-        const packageJsonPath = path.join(fullPath, 'package.json');
-        if (fs.existsSync(packageJsonPath)) {
-          // Read the file
-          // console.log("EXISTS",packageJsonPath)
+      // Check if the directory contains a package.json
+      const packageJsonPath = path.join(directory, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          // Read and parse package.json
           const fileData = fs.readFileSync(packageJsonPath, 'utf-8');
           const packageJson = JSON.parse(fileData);
 
-          // Extract dependencies and devDependencies (if they exist)
+          // Collect dependencies and devDependencies
           const deps = Object.keys(packageJson.dependencies || {});
           const devDeps = Object.keys(packageJson.devDependencies || {});
 
-          // Add them to the dependencies list (without versions)
+          // Append dependencies to the list (only unique values)
           dependencies.push(...deps, ...devDeps);
-        } else {
-          // console.log("DOES NOT EXISTS",packageJsonPath)
+        } catch (error) {
+          console.error(`Failed to read or parse ${packageJsonPath}:`, error);
+        }
+      }
+
+      // Recursively check subdirectories (skip node_modules)
+      const subDirs = fs.readdirSync(directory);
+      for (const subDir of subDirs) {
+        const fullPath = path.join(directory, subDir);
+        if (fs.lstatSync(fullPath).isDirectory()) {
+          traverseDir(fullPath);
         }
       }
     }
   }
-  return dependencies;
+
+  // Start traversal from the given starting point
+  traverseDir(startPoint);
+
+  // Return unique dependencies (removes duplicates)
+  return [...new Set(dependencies)];
 }

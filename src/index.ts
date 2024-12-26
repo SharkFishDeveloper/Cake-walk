@@ -12,7 +12,8 @@ async function start() {
   try {
     //? Add logic so it does not ask question again and agai
     // fs.rmSync('deepdive.yml', { force: true });
-    if (!fs.existsSync('deepdive.yml')) {
+    if (!fs.existsSync('barrenland.yml')) {
+      // console.log("DEONS not exists")
       //@ts-ignore
       const prompt_answer = await inquirer.prompt(questions);
 
@@ -28,8 +29,18 @@ async function start() {
             tag: prompt_answer.startPointTag,
           },
         ],
+        pathVisibility: prompt_answer.ansFormat,
+        excludeFolders: [
+          'node_modules',
+          '.git',
+          '.gitignore',
+          'package-lock.json',
+          'package.json',
+          'public',
+          'README.md'
+        ],
         exclude: [dependencies],
-        dependencies: prompt_answer.ansFormat,
+        
       };
 
       let yamlString = yaml.dump(ymlData, {
@@ -40,7 +51,7 @@ async function start() {
       });
 
       yamlString = yamlString.replace(/^(\w+):\n/gm, '\n$1:\n');
-      fs.writeFileSync('deepdive.yml', yamlString);
+      fs.writeFileSync('barrenland.yml', yamlString);
       console.log(
         yellowBright(
           `I made deepdive.yml file, please fill it and then continue. 
@@ -50,6 +61,7 @@ async function start() {
         )
       );
     } else {
+      // console.log("Exists")
       //* if yml is already present, then perform this FX
       await handleParsedDataAfterPrompt();
     }
@@ -57,6 +69,9 @@ async function start() {
     console.log(red(error));
   }
 }
+
+
+
 
 async function processDependencies(
   startFiles: string[],
@@ -69,28 +84,39 @@ async function processDependencies(
       language as string,
       start
     );
-    all_dependencies.push(...dependencies);
-    // console.log(all_dependencies)
+    all_dependencies.push('react','react-router-dom',...dependencies);
   }
-
-  // console.log('all_dependencies', all_dependencies);
-  const yamlString = fs.readFileSync('deepdive.yml', 'utf-8');
+  // Read the existing YAML file
+  const yamlString = fs.readFileSync('barrenland.yml', 'utf-8');
   const parsedYaml = yaml.load(yamlString);
 
-  // Step 3: Modify the specific heading (assuming the heading is a key in the object)
+  // Step 3: Merge existing exclude data with new dependencies
   if (parsedYaml && typeof parsedYaml === 'object') {
     //@ts-ignore
-    parsedYaml['exclude'] = all_dependencies;
+    const existingExcludes = Array.isArray(parsedYaml['exclude'])
+      ? parsedYaml['exclude']
+      : [];
+    const combinedExcludes = [...new Set([...existingExcludes, ...all_dependencies])];
+    //@ts-ignore
+    parsedYaml['exclude'] = combinedExcludes;
   }
+
+  // Convert updated object back to YAML
   const updatedYamlString = yaml.dump(parsedYaml);
 
-  // Step 5: Write the updated YAML string back to the file
-  fs.writeFileSync('deepdive.yml', updatedYamlString);
+  // Write the updated YAML string back to the file
+  fs.writeFileSync('barrenland.yml', updatedYamlString);
+
   return;
 }
 
+
+
+
+
+
 async function handleParsedDataAfterPrompt() {
-  const fileContent = fs.readFileSync('deepdive.yml', 'utf8');
+  const fileContent = fs.readFileSync('barrenland.yml', 'utf8');
   const parsedData = yaml.load(fileContent);
   //@ts-ignore
   let dataOfYml: string[] | null = parsedData.start;
@@ -100,10 +126,18 @@ async function handleParsedDataAfterPrompt() {
   //@ts-ignore
   let language: string | null = parsedData.codebase;
   //@ts-ignore
-  let howToSeeDependencies: string | null = parsedData.dependencies;
+  let howToSeeDependencies: string | null = parsedData.pathVisibility;
+
   if (!howToSeeDependencies || howToSeeDependencies === null) {
     return console.log(
       redBright('Please fill how to see dependencies in Deepdive.yml ...')
+    );
+  }
+    //@ts-ignore
+  let excludeFolders: string[] | null = parsedData.excludeFolders;
+  if (!excludeFolders || excludeFolders === null || excludeFolders.length === 0) {
+    return console.log(
+      redBright('Please fill the folders you want to  exclude, like node_modules ...')
     );
   }
 
@@ -122,8 +156,9 @@ async function handleParsedDataAfterPrompt() {
   //* < ------- >
   //* this function is just for reading the starting Files and all their dependencies
   await processDependencies(startFiles, all_dependencies, language[0]);
+  // console.log(all_dependencies)
   //* < ------- >
-
+// return;
   //@ts-ignore
   let proj_dependenciesdependencies: string[] | null = parsedData.exclude[0];
   // console.log(startFiles,tags,startFiles.length,startFiles[0])
@@ -164,7 +199,8 @@ async function handleParsedDataAfterPrompt() {
     language as string,
     all_dependencies ?? [],
     finalAns,
-    howToSeeDependencies
+    howToSeeDependencies,
+    excludeFolders
   );
 }
 

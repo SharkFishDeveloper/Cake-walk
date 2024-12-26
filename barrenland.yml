@@ -1,0 +1,42 @@
+
+codebase:
+        - ReactJs
+
+start:
+        -
+                path: ./repo
+                tag: repo
+pathVisibility: full
+
+excludeFolders:
+        - node_modules
+        - .git
+        - .gitignore
+        - package-lock.json
+        - package.json
+        - public
+        - README.md
+
+exclude:
+        -
+                - '@fortawesome/fontawesome'
+                - '@headlessui/react'
+                - '@heroicons/react'
+                - '@ramonak/react-progress-bar'
+                - '@testing-library/jest-dom'
+                - '@testing-library/react'
+                - '@testing-library/user-event'
+                - axios
+                - country-state-city
+                - js-cookie
+                - rc-progress
+                - react
+                - react-cookie
+                - react-country-region-selector
+                - react-dom
+                - react-icons
+                - react-router-dom
+                - react-scripts
+                - validator
+                - web-vitals
+                - tailwindcss

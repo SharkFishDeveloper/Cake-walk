@@ -20,7 +20,7 @@ const readDir_1 = require("../util/readDir");
 const fs_1 = __importDefault(require("fs"));
 let regex;
 let proj_dependencies;
-function doSomething(startfileArray, tags, language, dependencies, finalAns, howToSeeDependencies) {
+function doSomething(startfileArray, tags, language, dependencies, finalAns, howToSeeDependencies, excludeFolders) {
     return __awaiter(this, void 0, void 0, function* () {
         proj_dependencies = dependencies;
         //* add multiple switch statements for importing a particular language's REGEX
@@ -35,7 +35,7 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns, how
                     try {
                         if (stat.isDirectory()) {
                             console.log((0, cli_color_1.whiteBright)("Processed :--> ", tags[i], "\n"));
-                            const filesArray = yield (0, readDir_1.getFilesInDirectory)("./repo", "repo");
+                            const filesArray = yield (0, readDir_1.getFilesInDirectory)("./repo", "repo", excludeFolders);
                             for (let j = 0; j < filesArray.length; j++) {
                                 // console.log(greenBright("<--Next-->",filesArray[j].name));
                                 yield readImports(filesArray[j].short_path, filesArray[j].name, "./repo", "repo", finalAns, howToSeeDependencies);

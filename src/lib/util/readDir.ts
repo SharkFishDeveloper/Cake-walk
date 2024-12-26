@@ -5,12 +5,13 @@ interface FileInfo {
   name: string;
   short_path: string;
   full_path: string;
-  last_directory: string; // Add this field
+  last_directory: string;
 }
 
 export async function getFilesInDirectory(
   dirPath: string,
-  dirTag:string
+  dirTag: string,
+  excludeFolders: string[] // Array of folder or file names to exclude
 ): Promise<FileInfo[]> {
   let filesList: FileInfo[] = [];
 
@@ -25,28 +26,24 @@ export async function getFilesInDirectory(
     const files = fs.readdirSync(currentDir);
 
     for (const file of files) {
-      const fullPath = path.resolve(currentDir, file); // Use path.resolve for full absolute path
+      const fullPath = path.resolve(currentDir, file);
       const stat = fs.lstatSync(fullPath);
 
-      // Exclude .git and package.json
-      if (file === 'package.json' || file === '.git') {
+      // Check if the current file/folder should be excluded
+      if (excludeFolders.includes(file)) {
         continue;
       }
-      
-
-//* :TODO: Remove all comments
-
-      // If it's a directory, recurse into it
 
       if (stat.isDirectory()) {
+        // Recursively process the directory if not excluded
         readDirectory(fullPath, rootDir);
       } else {
-        // If it's a file, add it to the list
+        // Add the file to the list
         filesList.push({
           name: file,
-          short_path: path.join(dirPath,path.relative(rootDir, fullPath)), // Relative path to the root directory
-          full_path: fullPath, // Full absolute path
-          last_directory: path.basename(path.dirname(fullPath)), // Get the last directory name
+          short_path: path.join(dirTag, path.relative(rootDir, fullPath)),
+          full_path: fullPath,
+          last_directory: path.basename(path.dirname(fullPath)),
         });
       }
     }
@@ -57,6 +54,3 @@ export async function getFilesInDirectory(
 
   return filesList;
 }
-
-// Example usage
-// getFilesInDirectory('repo').then(files => console.log(files));

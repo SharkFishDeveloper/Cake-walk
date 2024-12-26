@@ -28,10 +28,6 @@ function readDependenciesFromPromt(language, startPoint) {
                 let relativeDirDependencies = yield readPackageJsonForEachDir(startPoint);
                 //* <----->
                 answerDependencies = [
-                    // ...allDependenciesForJsTs,
-                    'react',
-                    'react-dom',
-                    'react-router-dom',
                     ...relativeDirDependencies,
                 ];
         }
@@ -42,35 +38,43 @@ exports.readDependenciesFromPromt = readDependenciesFromPromt;
 exports.default = readDependenciesFromPromt;
 function readPackageJsonForEachDir(startPoint) {
     return __awaiter(this, void 0, void 0, function* () {
-        const parts = startPoint.split('/');
-        const subPaths = [];
         const dependencies = [];
-        for (let i = 1; i <= parts.length; i++) {
-            const subPath = parts.slice(1, i).join('/');
-            if (subPath) {
-                const fullPath = path_1.default.join(process.cwd(), subPath);
-                const isDir = fs_1.default.existsSync(fullPath) && fs_1.default.lstatSync(fullPath).isDirectory();
-                if (isDir) {
-                    subPaths.push(fullPath);
-                    // Check if package.json exists in the directory
-                    const packageJsonPath = path_1.default.join(fullPath, 'package.json');
-                    if (fs_1.default.existsSync(packageJsonPath)) {
-                        // Read the file
-                        // console.log("EXISTS",packageJsonPath)
+        // Recursive helper function to traverse directories
+        function traverseDir(directory) {
+            if (fs_1.default.existsSync(directory) && fs_1.default.lstatSync(directory).isDirectory()) {
+                // Prevent going into node_modules
+                if (directory.includes('node_modules'))
+                    return;
+                // Check if the directory contains a package.json
+                const packageJsonPath = path_1.default.join(directory, 'package.json');
+                if (fs_1.default.existsSync(packageJsonPath)) {
+                    try {
+                        // Read and parse package.json
                         const fileData = fs_1.default.readFileSync(packageJsonPath, 'utf-8');
                         const packageJson = JSON.parse(fileData);
-                        // Extract dependencies and devDependencies (if they exist)
+                        // Collect dependencies and devDependencies
                         const deps = Object.keys(packageJson.dependencies || {});
                         const devDeps = Object.keys(packageJson.devDependencies || {});
-                        // Add them to the dependencies list (without versions)
+                        // Append dependencies to the list (only unique values)
                         dependencies.push(...deps, ...devDeps);
                     }
-                    else {
-                        // console.log("DOES NOT EXISTS",packageJsonPath)
+                    catch (error) {
+                        console.error(`Failed to read or parse ${packageJsonPath}:`, error);
+                    }
+                }
+                // Recursively check subdirectories (skip node_modules)
+                const subDirs = fs_1.default.readdirSync(directory);
+                for (const subDir of subDirs) {
+                    const fullPath = path_1.default.join(directory, subDir);
+                    if (fs_1.default.lstatSync(fullPath).isDirectory()) {
+                        traverseDir(fullPath);
                     }
                 }
             }
         }
-        return dependencies;
+        // Start traversal from the given starting point
+        traverseDir(startPoint);
+        // Return unique dependencies (removes duplicates)
+        return [...new Set(dependencies)];
     });
 }
