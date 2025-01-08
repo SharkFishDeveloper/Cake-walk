@@ -184,14 +184,14 @@ async function handleParsedDataAfterPrompt() {
     );
   }
 
-  if (
-    proj_dependenciesdependencies === null ||
-    proj_dependenciesdependencies.length === 0
-  ) {
-    return console.log(
-      redBright('Please fill all the dependencies in  Deepdive.yml ...')
-    );
-  }
+  // if (
+  //   proj_dependenciesdependencies === null ||
+  //   proj_dependenciesdependencies.length === 0
+  // ) {
+  //   return console.log(
+  //     redBright('Please fill all the dependencies in  Deepdive.yml ...')
+  //   );
+  // }
   let finalAns: ImportsMap = {};
 
   await doSomething(

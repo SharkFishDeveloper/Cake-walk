@@ -37,13 +37,12 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns, how
                             console.log((0, cli_color_1.whiteBright)("Processed :--> ", tags[i], "\n"));
                             const filesArray = yield (0, readDir_1.getFilesInDirectory)(startfileArray[i], tags[i], excludeFolders);
                             for (let j = 0; j < filesArray.length; j++) {
-                                // console.log(greenBright("<--Next-->",filesArray[j].name));
-                                yield readImports(filesArray[j].short_path, filesArray[j].name, "./repo", "repo", finalAns, howToSeeDependencies);
+                                yield readImports(filesArray[j].short_path, filesArray[j].name, finalAns, howToSeeDependencies, excludeFolders);
                             }
                         }
                         else if (stat.isFile()) {
                             console.log((0, cli_color_1.whiteBright)("Processed :--> ", tags[i], "\n"));
-                            yield readImports(startfileArray[i], tags[i], "", "", finalAns, howToSeeDependencies);
+                            yield readImports(startfileArray[i], tags[i], finalAns, howToSeeDependencies, excludeFolders);
                             // console.log(greenBright("<--Next-->"));
                         }
                     }
@@ -69,10 +68,10 @@ function doSomething(startfileArray, tags, language, dependencies, finalAns, how
     });
 }
 exports.doSomething = doSomething;
-function readImports(startfile, tag, dirLocation, dirTag, finalAns, howToSeeDependencies) {
+function readImports(startfile, tag, finalAns, howToSeeDependencies, excludeFolders) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile, tag, dirLocation, dirTag, finalAns, howToSeeDependencies);
+            yield (0, jsImports_1.INITIAL_START_parseJsImports)(regex, proj_dependencies, startfile, tag, finalAns, howToSeeDependencies, excludeFolders);
         }
         catch (error) {
             console.log((0, cli_color_1.redBright)(error));

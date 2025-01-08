@@ -32,16 +32,15 @@ export async function doSomething(
         if (stat.isDirectory()) {
           console.log(whiteBright("Processed :--> ", tags[i], "\n"));
           const filesArray = await getFilesInDirectory(startfileArray[i],tags[i],excludeFolders);
-          for (let j = 0; j < filesArray.length; j++) {
-            // console.log(greenBright("<--Next-->",filesArray[j].name));
-           
-            await readImports(filesArray[j].short_path, filesArray[j].name, "./repo", "repo" ,finalAns, howToSeeDependencies);
 
+          for (let j = 0; j < filesArray.length; j++) {
+            await readImports(filesArray[j].short_path, filesArray[j].name,finalAns, howToSeeDependencies,excludeFolders);
           }
+
         }
         else if (stat.isFile()) {
           console.log(whiteBright("Processed :--> ", tags[i], "\n"));
-          await readImports(startfileArray[i], tags[i],"","" ,finalAns, howToSeeDependencies);
+          await readImports(startfileArray[i], tags[i],finalAns, howToSeeDependencies,excludeFolders);
           // console.log(greenBright("<--Next-->"));
         }
        } catch (error) {
@@ -69,10 +68,9 @@ export async function doSomething(
 export async function readImports(
   startfile: string,
   tag: string,
-  dirLocation: string,
-  dirTag: string,
   finalAns: ImportsMap,
-  howToSeeDependencies: string
+  howToSeeDependencies: string,
+  excludeFolders:string[]
 ) {
   try {
     await INITIAL_START_parseJsImports(
@@ -80,10 +78,9 @@ export async function readImports(
       proj_dependencies,
       startfile,
       tag,
-      dirLocation,
-      dirTag,
       finalAns,
-      howToSeeDependencies
+      howToSeeDependencies,
+      excludeFolders
     );
   } catch (error) {
     console.log(redBright(error));

@@ -151,10 +151,14 @@ function handleParsedDataAfterPrompt() {
             tags.length !== startFiles.length) {
             return console.log((0, cli_color_1.redBright)('Please enter the start tags in Deepdive.yml ...'));
         }
-        if (proj_dependenciesdependencies === null ||
-            proj_dependenciesdependencies.length === 0) {
-            return console.log((0, cli_color_1.redBright)('Please fill all the dependencies in  Deepdive.yml ...'));
-        }
+        // if (
+        //   proj_dependenciesdependencies === null ||
+        //   proj_dependenciesdependencies.length === 0
+        // ) {
+        //   return console.log(
+        //     redBright('Please fill all the dependencies in  Deepdive.yml ...')
+        //   );
+        // }
         let finalAns = {};
         yield (0, doSomething_1.doSomething)(startFiles, tags, language, all_dependencies !== null && all_dependencies !== void 0 ? all_dependencies : [], finalAns, howToSeeDependencies, excludeFolders);
     });

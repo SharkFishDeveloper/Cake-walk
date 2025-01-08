@@ -1,3 +1,4 @@
+import { green, red } from 'cli-color';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -28,14 +29,15 @@ export async function getFilesInDirectory(
     for (const file of files) {
       const fullPath = path.resolve(currentDir, file);
       const stat = fs.lstatSync(fullPath);
-
-      // Check if the current file/folder should be excluded
-      if (excludeFolders.includes(file)) {
-        continue;
+    
+      // Check if the current file/folder should be excluded by splitting path and checking for exact matches
+      const pathParts = fullPath.split(path.sep);
+      if (excludeFolders.some(exclude => pathParts.includes(exclude))) {
+        // console.log(red(fullPath));
+        continue; // Skip excluded folders or files
       }
-
+      // console.log(green(fullPath))
       if (stat.isDirectory()) {
-        // Recursively process the directory if not excluded
         readDirectory(fullPath, rootDir);
       } else {
         // Add the file to the list
@@ -46,7 +48,6 @@ export async function getFilesInDirectory(
           last_directory: path.basename(path.dirname(fullPath)),
         });
       }
-      // console.log(dirTag, rootDir, fullPath);
     }
   };
 

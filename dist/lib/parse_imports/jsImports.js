@@ -19,7 +19,7 @@ const path_1 = __importDefault(require("path"));
 const jstsExtensions_1 = __importDefault(require("../extensions/jstsExtensions"));
 const read_dep_in_files_1 = require("../read_dependencies/read-dep-in-files");
 function INITIAL_START_parseJsImports(regex, proj_dependencies, child_path, // starting file location eg- src/pages/App.js
-tag, dirLocation, dirTag, finalAns, howToSeeDependencies) {
+tag, finalAns, howToSeeDependencies, excludeFolders) {
     return __awaiter(this, void 0, void 0, function* () {
         let edges = [];
         let child_path_with_parent_path = path_1.default.join(process.cwd(), child_path);
@@ -42,18 +42,15 @@ tag, dirLocation, dirTag, finalAns, howToSeeDependencies) {
                     }
                 }
             }
-            if (fs_1.default.existsSync(path_Child_Complete)) {
-                refinedImports.push(path_Child_Complete);
-                yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag, edges);
+            if (!excludeFolders.some((exc) => path_Child_Complete.split(path_1.default.sep).includes(exc))) {
+                if (fs_1.default.existsSync(path_Child_Complete)) {
+                    refinedImports.push(path_Child_Complete);
+                    yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, child_half_path, path_Child_Complete, child_path, parent_full_path, tag, edges, excludeFolders);
+                }
             }
-            // break;
         }
-        // await createHtmlFile(graph,tag);
         const graph = createGraph(edges);
         if (refinedImports.length > 0) {
-            // console.log(greenBright("Start",importsInAFile.length,importsInAFile.map((imp)=>{
-            //   console.log(imp.from)
-            // })));
             console.log((0, cli_color_1.greenBright)("Start"));
             printDependencyTree(graph, howToSeeDependencies);
             console.log("\n");
@@ -61,10 +58,9 @@ tag, dirLocation, dirTag, finalAns, howToSeeDependencies) {
     });
 }
 exports.INITIAL_START_parseJsImports = INITIAL_START_parseJsImports;
-function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_half_path, child_full_path, node_half_path, node_full_path, parent_name, edges) {
+function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_half_path, child_full_path, node_half_path, node_full_path, parent_name, edges, excludeFolders) {
     return __awaiter(this, void 0, void 0, function* () {
         let importsInAFile = [];
-        // console.log(parent_name,magenta("->"),childName,yellow("->"),node_half_path)
         edges.push({
             parent: parent_name,
             child: child_half_path,
@@ -95,7 +91,12 @@ function parseJsImportsDFS(regex, proj_dependencies, finalAns, childName, child_
                 }
                 const half_path_child = extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
                 if (pathChild_withExtension !== 'DNE') {
-                    yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path, childName, edges);
+                    // Split the path into parts and check if any part matches the exclusion criteria
+                    const pathParts = pathChild_withExtension.split(path_1.default.sep);
+                    if (!excludeFolders.some(exclude => pathParts.includes(exclude))) {
+                        // If not excluded, continue processing
+                        yield parseJsImportsDFS(regex, proj_dependencies, finalAns, imp.imported, half_path_child, pathChild_withExtension, child_half_path, child_full_path, childName, edges, excludeFolders);
+                    }
                 }
             }
         }

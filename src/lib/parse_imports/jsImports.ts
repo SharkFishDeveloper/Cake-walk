@@ -11,10 +11,9 @@ export async function INITIAL_START_parseJsImports(
   proj_dependencies: string[],
   child_path: string, // starting file location eg- src/pages/App.js
   tag: string,
-  dirLocation: string,
-  dirTag: string,
   finalAns: ImportsMap,
-  howToSeeDependencies: string
+  howToSeeDependencies: string,
+  excludeFolders:string[]
 ) {
   let edges: Edge[] = [];
 
@@ -54,31 +53,31 @@ export async function INITIAL_START_parseJsImports(
     }
 
    
-
-    if (fs.existsSync(path_Child_Complete)) {
-      refinedImports.push(path_Child_Complete);
-      await parseJsImportsDFS(
-        regex,
-        proj_dependencies,
-        finalAns,
-        imp.imported,
-        child_half_path,
-        path_Child_Complete,
-        child_path,
-        parent_full_path,
-        tag,
-        edges
-      );
+    if (!excludeFolders.some((exc) => path_Child_Complete.split(path.sep).includes(exc))) {
+      if (fs.existsSync(path_Child_Complete)) {
+        refinedImports.push(path_Child_Complete);
+        await parseJsImportsDFS(
+          regex,
+          proj_dependencies,
+          finalAns,
+          imp.imported,
+          child_half_path,
+          path_Child_Complete,
+          child_path,
+          parent_full_path,
+          tag,
+          edges,
+          excludeFolders
+        );
+      }
     }
-    // break;
+    
+
   }
-  // await createHtmlFile(graph,tag);
+
   const graph = createGraph(edges);
   if(refinedImports.length > 0)
     {
-        // console.log(greenBright("Start",importsInAFile.length,importsInAFile.map((imp)=>{
-        //   console.log(imp.from)
-        // })));
         console.log(greenBright("Start"))
         printDependencyTree(graph, howToSeeDependencies);
         console.log("\n")
@@ -105,10 +104,11 @@ export async function parseJsImportsDFS(
   node_half_path: string,
   node_full_path: string,
   parent_name: string,
-  edges: Edge[]
+  edges: Edge[],
+  excludeFolders:string[]
 ) {
   let importsInAFile: JsImports[] = [];
-  // console.log(parent_name,magenta("->"),childName,yellow("->"),node_half_path)
+
   edges.push({
     parent: parent_name,
     child: child_half_path,
@@ -149,20 +149,27 @@ export async function parseJsImportsDFS(
       const half_path_child =
         extOfFile === null ? imp.from : `${imp.from}${extOfFile}`;
 
-      if (pathChild_withExtension !== 'DNE') {
-        await parseJsImportsDFS(
-          regex,
-          proj_dependencies,
-          finalAns,
-          imp.imported,
-          half_path_child,
-          pathChild_withExtension,
-          child_half_path,
-          child_full_path,
-          childName,
-          edges
-        );
-      }
+        if (pathChild_withExtension !== 'DNE') {
+          // Split the path into parts and check if any part matches the exclusion criteria
+          const pathParts = pathChild_withExtension.split(path.sep);
+          
+          if (!excludeFolders.some(exclude => pathParts.includes(exclude))) {
+            // If not excluded, continue processing
+            await parseJsImportsDFS(
+              regex,
+              proj_dependencies,
+              finalAns,
+              imp.imported,
+              half_path_child,
+              pathChild_withExtension,
+              child_half_path,
+              child_full_path,
+              childName,
+              edges,
+              excludeFolders
+            );
+          }
+        }
     }
   }
 }
