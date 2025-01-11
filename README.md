@@ -4,6 +4,11 @@
 
 When working on a new project, encountering numerous imports and their interdependencies can often be a challenge. **Barrenland** provides a way to visualize this hierarchy, making it easier to understand how files are connected through imports. This insight can significantly enhance productivity and reduce the time spent trying to track down issues or understand the flow of data.
 
+**Github** - https://github.com/SharkFishDeveloper/Cake-walk
+
+![Alt text](assets/barrenland-image.png)
+
+
 ## Key Features
 
 *   **Visualize Import Hierarchies:** Easily understand how files are interconnected through imports.
