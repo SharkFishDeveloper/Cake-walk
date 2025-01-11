@@ -6,7 +6,8 @@ When working on a new project, encountering numerous imports and their interdepe
 
 **Github** - https://github.com/SharkFishDeveloper/Cake-walk
 
-![Logo](./assets/barrenland-image.png)
+![screenshot](https://raw.githubusercontent.com/SharkFishDeveloper/Cake-walk/main/assets/barrenland-image.jpg)
+
 
 
 ## Key Features
